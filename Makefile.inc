@@ -30,4 +30,4 @@ APPLCLIBS = -L$(shell applgrid-config --prefix)/lib -lAPPLgrid
 PRJLDFLAGS = $(LHAPDFLIBS) $(APPLCLIBS) $(ROOTLIBS) $(APFELLIBS)
 
 # scheduling and optimization options
-PRJCXXFLAGS = -Wall -O3 $(ALLDIR) $(LHAPDFINCS) $(APPLINCS) $(ROOTINCS) $(APFELINCS)
+PRJCXXFLAGS = -Wall -O3 $(ALLDIR) $(APPLINCS) $(ROOTINCS) $(APFELINCS) $(LHAPDFINCS)

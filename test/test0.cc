@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include <cstdio>
 
-#include "APFEL/apfel.h"
+#include "APFEL/APFEL.h"
 
 static const double Q0 = 1.0; // 1 GeV initial scale
 
