@@ -21,12 +21,12 @@
 // SOFTWARE.
 
 #include "APFELgrid.h"
-#include "APFEL/apfel.h"
+#include "APFEL/APFEL.h"
 
 #include "appl_grid/appl_grid.h"
 #include "appl_grid/appl_igrid.h"
 
-#include "NNPDF/FKGenerator.h"
+#include "NNPDF/fkgenerator.h"
 
 #include <math.h>
 
@@ -50,7 +50,7 @@ namespace APFELgrid{
         for (int ix1=0; ix1<igrid->Ny1(); ix1++)
           for (int ix2=0; ix2<igrid->Ny2(); ix2++)
             for (int t=0; t<igrid->Ntau(); t++) 
-              for (size_t ip=0; ip<g.subProcesses(i); ip++)
+              for (int ip=0; ip<g.subProcesses(i); ip++)
                 {
                   // Associated weight
                   const double point_weight = (*(const SparseMatrix3d*) igrid->weightgrid(ip))(t,ix1,ix2);
@@ -143,7 +143,7 @@ namespace APFELgrid{
     appl::igrid* igrid_nc = const_cast<appl::igrid*>(igrid);
     nxlow=igrid->Ny2(); nxhigh=0;
     tsparse1d<double> *ts1;
-    for (size_t tsp=0; tsp<nsubproc; tsp++)
+    for (int tsp=0; tsp<nsubproc; tsp++)
       if ((*(const SparseMatrix3d*) igrid_nc->weightgrid(tsp))[tau] != NULL)
         if (( ts1 = (*(const SparseMatrix3d*) igrid_nc->weightgrid(tsp))[tau]->trimmed(alpha) ) != NULL)
         {                
@@ -182,7 +182,7 @@ namespace APFELgrid{
   {
     const int nxin = APFEL::nIntervals() + 1;
     double*** f = new double**[nxin];
-    for (size_t i=0; i<nxin; i++)
+    for (int i=0; i<nxin; i++)
     {
       f[i] = new double*[14];  // These are in EVLN basis (photon!)
       for (size_t j=0; j<14; j++)
@@ -195,7 +195,7 @@ namespace APFELgrid{
   void free_evfactor( double*** f )
   {
     const int nxin = APFEL::nIntervals() + 1;
-    for (size_t i=0; i<nxin; i++)
+    for (int i=0; i<nxin; i++)
     {    
       for (size_t j=0; j<14; j++)
         delete[] f[i][j];
@@ -213,10 +213,10 @@ namespace APFELgrid{
     const double Q1diff = fabs(Q1-APFEL::GetMuF());
 
     // Recalculate if not cached
-    if ( Q0diff > 1E-10 | Q1diff > 1E-10)
+    if ( (Q0diff > 1E-10) || (Q1diff > 1E-10) )
         APFEL::EvolveAPFEL(Q0,Q1);
 
-    for (size_t xi = 0; xi < nxin; xi++)
+    for (int xi = 0; xi < nxin; xi++)
       for (size_t fi = 0; fi < 14; fi++)
         for(int i=0; i<13; i++)
           fA[xi][fi][i] = APFEL::ExternalEvolutionOperator(std::string("Ev2Ph"),i-6,fi,xo,xi);
@@ -285,7 +285,7 @@ namespace APFELgrid{
     double*** fA = alloc_evfactor();
     double*** fB = alloc_evfactor();
   
-    for (size_t d=0; d<g.Nobs(); d++)
+    for (int d=0; d<g.Nobs(); d++)
     {
       std::cout << d<<"/"<<g.Nobs() << " points completed "<<std::endl;
       for (size_t pto=0; pto < get_ptord(g); pto++)

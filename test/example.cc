@@ -18,7 +18,7 @@
 //#include "LHAPDF/LHAPDF.h"
 
 #include "appl_grid/appl_grid.h"
-#include "NNPDF/FastKernel.h"
+#include "NNPDF/fastkernel.h"
 
 static const double Q0 = 1.0; // 1 GeV initial scale
 
