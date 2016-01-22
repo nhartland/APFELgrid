@@ -7,7 +7,8 @@ Requirements
 
 **libnnpdf** master
 
-**APPLgrid** 1.4.70
+**APPLgrid** 1.4.70 modified such that all headers are installed
+(simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)
 
 How to run the example
 ----------------------
