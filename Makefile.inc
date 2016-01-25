@@ -26,10 +26,6 @@ LHAPDFLIBS = -L$(LHAPDFDIR) -lLHAPDF
 APPLINCS = -I$(shell applgrid-config --prefix)/include
 APPLCLIBS = -L$(shell applgrid-config --prefix)/lib -lAPPLgrid 
 
-# libnnpdf
-NNPDFINCLUDE= $(shell nnpdf-config --cppflags)
-NNPDFLIBS= $(shell nnpdf-config --ldflags)
-
 # additional libraries to be included 
 PRJLDFLAGS = $(LHAPDFLIBS) $(APPLCLIBS) $(ROOTLIBS) $(APFELLIBS) $(NNPDFLIBS)
 

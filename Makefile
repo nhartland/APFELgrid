@@ -6,7 +6,7 @@ LDLIBS   =  $(PRJLDFLAGS)
 VPATH=./test:./src
 
 MAIN = example
-MAIN_SRC = example.cc APFELgrid.cc 
+MAIN_SRC = example.cc APFELgrid.cc fastkernel.cc fkgenerator.cc
 MAIN_OBJ = $(MAIN_SRC:%.cc=%.o)
 
 .PHONY: all clean

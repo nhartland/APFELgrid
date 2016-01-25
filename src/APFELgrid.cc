@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "APFELgrid.h"
+#include "APFELgrid/APFELgrid.h"
 #include "APFEL/APFEL.h"
 
 #include "appl_grid/appl_grid.h"

@@ -13,7 +13,7 @@
 #include <cstdio>
 
 #include "APFEL/APFEL.h"
-#include "APFELgrid.h"
+#include "APFELgrid/APFELgrid.h"
 
 //#include "LHAPDF/LHAPDF.h"
 
