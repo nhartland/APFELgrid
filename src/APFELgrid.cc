@@ -180,7 +180,7 @@ namespace APFELgrid{
   // Allocates the arrays used for evolution factors
   double*** alloc_evfactor()
   {
-    const int nxin = APFEL::nIntervals() + 1;
+    const int nxin = APFEL::nIntervals();
     double*** f = new double**[nxin];
     for (int i=0; i<nxin; i++)
     {
@@ -194,7 +194,7 @@ namespace APFELgrid{
   // Frees evolution factor array f
   void free_evfactor( double*** f )
   {
-    const int nxin = APFEL::nIntervals() + 1;
+    const int nxin = APFEL::nIntervals();
     for (int i=0; i<nxin; i++)
     {    
       for (size_t j=0; j<14; j++)
@@ -208,7 +208,7 @@ namespace APFELgrid{
   void compute_evfactors( double const& Q0, double const& Q1, double const& xo, double*** fA )
   {
     // APFEL parameters
-    const int nxin = APFEL::nIntervals() + 1;
+    const int nxin = APFEL::nIntervals();
     const double Q0diff = fabs(Q0-APFEL::GetMuF0());
     const double Q1diff = fabs(Q1-APFEL::GetMuF());
 
@@ -240,7 +240,7 @@ namespace APFELgrid{
     FKhead.AddTag(NNPDF::FKHeader::THEORYINFO, "Q0", Q0 );
 
     // x-grid header
-    const int nx = APFEL::nIntervals() + 1;
+    const int nx = APFEL::nIntervals();
     FKhead.AddTag(NNPDF::FKHeader::GRIDINFO, "NX", nx );
     std::stringstream xGheader;
     for (int i=0; i<nx; i++)
@@ -335,7 +335,7 @@ namespace APFELgrid{
                 // Compute evolution factors for second PDF
                 compute_evfactors(Q0, Q, x2, fB);
 
-                const size_t nxin = APFEL::nIntervals() + 1;
+                const size_t nxin = APFEL::nIntervals();
                 for (size_t i=0; i<nxin; i++) // Loop over input pdf x1
                 for (size_t j=0; j<nxin; j++) // Loop over input pdf x2
                 for (size_t k=0; k<14; k++) // loop over flavour 1

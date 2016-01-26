@@ -30,6 +30,7 @@
 #include <cmath>
 #include <algorithm>
 #include <sstream>
+#include <iterator>
 
 #include "NNPDF/fastkernel.h"
 #include "NNPDF/exceptions.h"

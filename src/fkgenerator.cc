@@ -42,9 +42,9 @@ namespace NNPDF
   }
 
   // Fill the FKTable - beware there is no error checking performed!
-  void FKGenerator::Fill(   size_t const& d,     // Datapoint index
-                            size_t const& ix1,   // First x-index
-                            size_t const& ix2,   // Second x-index
+  void FKGenerator::Fill(   int const& d,     // Datapoint index
+                            int const& ix1,   // First x-index
+                            int const& ix2,   // Second x-index
                             size_t const& ifl1,  // First flavour index
                             size_t const& ifl2,  // Second flavour index
                             real const& fk  // FK Value
@@ -80,8 +80,8 @@ namespace NNPDF
   };
 
   // DIS version of Fill
-  void FKGenerator::Fill( size_t const& d,     // Datapoint index
-                          size_t const& ix,    // x-index
+  void FKGenerator::Fill( int const& d,     // Datapoint index
+                          int const& ix,    // x-index
                           size_t const& ifl,   // flavour index
                           real const& fk  // FK Value
                         )

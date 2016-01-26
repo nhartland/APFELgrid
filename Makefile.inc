@@ -27,7 +27,7 @@ APPLINCS = -I$(shell applgrid-config --prefix)/include
 APPLCLIBS = -L$(shell applgrid-config --prefix)/lib -lAPPLgrid 
 
 # additional libraries to be included 
-PRJLDFLAGS = $(LHAPDFLIBS) $(APPLCLIBS) $(ROOTLIBS) $(APFELLIBS) $(NNPDFLIBS)
+PRJLDFLAGS = $(APFELLIBS) $(LHAPDFLIBS) $(APPLCLIBS) $(ROOTLIBS) $(NNPDFLIBS)
 
 # scheduling and optimization options
 PRJCXXFLAGS = -Wall -O3 $(ALLDIR) $(APPLINCS) $(ROOTINCS) $(APFELINCS) $(LHAPDFINCS) $(NNPDFINCLUDE)
