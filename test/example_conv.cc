@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 	NNPDF::real* results = new NNPDF::real[FK.GetNData()];
 	FK.Convolute(fkpdf, 1, results);
 
-	for (size_t i=0; i < FK.GetNData(); i++)
+	for (int i=0; i < FK.GetNData(); i++)
 		std::cout << results[i] <<std::endl;
 
 	delete[] results;
