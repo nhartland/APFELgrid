@@ -302,6 +302,7 @@ namespace APFELgrid{
         appl::igrid const *igrid = g.weightgrid(gidx, d);
         for (int t=0; t<igrid->Ntau(); t++) // Loop over scale bins
         {
+        std::cout << t<<"/"<<igrid->Ntau() << " scales completed "<<std::endl;
           const double Q   = sqrt( igrid->fQ2( igrid->gettau(t)) );
           const double as  = APFEL::AlphaQCD(Q);
           

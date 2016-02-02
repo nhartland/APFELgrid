@@ -772,7 +772,7 @@ namespace NNPDF
     // Calculate observables
     #pragma omp parallel for
     for (int i = 0; i < fNData; i++)
-      for (int n = 0; n < Npdf; n++)
+      for (size_t n = 0; n < Npdf; n++)
       {
         out[i*Npdf + n] = 0;
         convolute(pdf+fDSz*n,fSigma+fDSz*i,out[i*Npdf + n],fDSz);
@@ -791,7 +791,7 @@ namespace NNPDF
     const int NFL = 14;
     real* EVLN = new real[fNx*NFL];
     
-    for (int n = 0; n < NPDF; n++)
+    for (size_t n = 0; n < NPDF; n++)
     {
       for (int i = 0; i < fNx; i++)
         inpdf(fXgrid[i], sqrt(fQ20), n, &EVLN[i*NFL]);
