@@ -770,7 +770,7 @@ namespace NNPDF
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 0; i < fNData; i++)
       for (size_t n = 0; n < Npdf; n++)
       {
