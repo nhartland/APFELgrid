@@ -9,9 +9,9 @@
 
 #include "APFEL/APFEL.h"
 #include "APFELgrid/APFELgrid.h"
+#include "APFELgrid/fastkernel.h"
 
 #include "appl_grid/appl_grid.h"
-#include "NNPDF/fastkernel.h"
 
 static const double Q0 = 1.0; // 1 GeV initial scale
 

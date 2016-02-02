@@ -21,12 +21,12 @@
 // SOFTWARE.
 
 #include "APFELgrid/APFELgrid.h"
+#include "APFELgrid/fkgenerator.h"
+
 #include "APFEL/APFEL.h"
 
 #include "appl_grid/appl_grid.h"
 #include "appl_grid/appl_igrid.h"
-
-#include "NNPDF/fkgenerator.h"
 
 #include <math.h>
 

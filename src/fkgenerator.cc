@@ -24,8 +24,8 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "NNPDF/fkgenerator.h"
-#include "NNPDF/exceptions.h"
+#include "APFELgrid/fkgenerator.h"
+#include "APFELgrid/exceptions.h"
 
 namespace NNPDF
 {

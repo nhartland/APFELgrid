@@ -13,8 +13,8 @@
 #include "LHAPDF/LHAPDF.h"
 
 #include "appl_grid/appl_grid.h"
-#include "NNPDF/fastkernel.h"
-#include "NNPDF/transform.h"
+#include "APFELgrid/fastkernel.h"
+#include "APFELgrid/transform.h"
 
 extern "C" void evolvepdf_(const double& , const double& , double* );
 static double* lha_pdf;

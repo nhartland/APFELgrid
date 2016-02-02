@@ -32,8 +32,8 @@
 #include <sstream>
 #include <iterator>
 
-#include "NNPDF/fastkernel.h"
-#include "NNPDF/exceptions.h"
+#include "APFELgrid/fastkernel.h"
+#include "APFELgrid/exceptions.h"
 
 namespace NNPDF
 {
