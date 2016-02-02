@@ -1,21 +1,14 @@
-// example.cc
+// example_gen.cc
 // This example demonstrates how an APPLgrid can be combined
 // with evolution factors provided by APFEL to produce a FastKernel (FK)
 // table.
 
-#include <vector>
 #include <iostream>
-#include <cstdlib>
 #include <fstream>
 #include <string>
-#include <time.h>
-#include <sys/time.h>
-#include <cstdio>
 
 #include "APFEL/APFEL.h"
 #include "APFELgrid/APFELgrid.h"
-
-//#include "LHAPDF/LHAPDF.h"
 
 #include "appl_grid/appl_grid.h"
 #include "NNPDF/fastkernel.h"
@@ -45,7 +38,7 @@ int main(int argc, char* argv[]) {
   APFEL::SetGridParameters(2,15,5,1e-1);
 
   // Generate FK table
-  NNPDF::FKTable* FK = APFELgrid::computeFK("SETNAME", g, Q0, false);
+  NNPDF::FKTable* FK = APFELgrid::computeFK("ATLASZRAP", g, Q0, false);
 
   // Write FK table to file
   std::ofstream outfile; outfile.open("test.dat");

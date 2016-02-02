@@ -126,6 +126,9 @@ namespace NNPDF
         virtual ~FKTable(); //!< Destructor
         void Print(std::ostream&); //!< Print FKTable header to ostream
 
+        typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, real* pdf);
+        void Convolute(extern_pdf pdf, size_t const& NPDF, real* out);
+
         // ********************* FK Verbosity ****************************
 
         static bool Verbose;
@@ -203,6 +206,7 @@ namespace NNPDF
         FKTable& operator=(const FKTable&); //!< Disable copy-assignment
 
         void InitialiseFromStream(std::istream&, std::vector<std::string> const& cFactors); //!< Initialise the FK table from an input stream
+        void CachePDF(extern_pdf inpdf, size_t const& NPDF, real* pdf); // Cache PDF for convolution
 
         int parseNonZero(); // Parse flavourmap information into fNonZero
     };

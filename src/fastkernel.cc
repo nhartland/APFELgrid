@@ -41,6 +41,44 @@ namespace NNPDF
   // Default verbosity level
   bool FKTable::Verbose = true;
 
+  // ***************** Linear convolution *********************
+
+
+#ifdef SSE_CONV
+  #include <pmmintrin.h>
+
+  static inline void convolute(const real* __restrict__ x, const real* __restrict__ y, real& retval, int const& n)
+  {
+    __m128 acc = _mm_setzero_ps();
+
+    const __m128* a = (const __m128*) x;
+    const __m128* b = (const __m128*) y;
+
+    for (int i=0; i<n/4; i++)
+      acc = _mm_add_ps(acc, _mm_mul_ps(*(a+i),*(b+i)));
+
+    const __m128 shuffle1 = _mm_shuffle_ps(acc, acc, _MM_SHUFFLE(1,0,3,2));
+    const __m128 tmp1     = _mm_add_ps(acc, shuffle1);
+    const __m128 shuffle2 = _mm_shuffle_ps(tmp1, tmp1, _MM_SHUFFLE(2,3,0,1));
+    const __m128 tmp2     = _mm_add_ps(tmp1, shuffle2);
+
+    _mm_store_ss(&retval,tmp2);
+    _mm_empty();
+
+    return;
+  }
+
+#else
+
+  // Basic convolution
+  static inline void convolute(const real* __restrict__ pdf,const real* __restrict__ sig,real& retval,int const& n)
+  {
+    for (int i = 0; i < n; i++)
+      retval += pdf[i]*sig[i];
+  }
+
+#endif
+
   // ******************* Helpers ******************************
 
   /**
@@ -63,6 +101,10 @@ namespace NNPDF
   static const int FK_DELIN_BLB = std::char_traits<char>::to_int_type('{');
   static const int FK_DELIN_KEY = std::char_traits<char>::to_int_type('*');
   // *********************************************************
+
+
+
+
 
   /**
   * @brief Prototype Constructor for FKParser class - to be used only for constructing new FK tables
@@ -716,6 +758,63 @@ namespace NNPDF
 
     g.close();
   }
+
+  // Perform convolution
+  void FKTable::Convolute(extern_pdf inpdf, size_t const& Npdf, real* out)
+  {
+    // Fetch PDF array
+    real *pdf = 0;
+    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(real)*fDSz*Npdf);
+    if (err != 0)
+      throw RangeError("FKTable::Convolute","ThPredictions posix_memalign " + std::to_string(err));
+    CachePDF(inpdf, Npdf, pdf);
+
+    // Calculate observables
+    #pragma omp parallel for
+    for (int i = 0; i < fNData; i++)
+      for (int n = 0; n < Npdf; n++)
+      {
+        out[i*Npdf + n] = 0;
+        convolute(pdf+fDSz*n,fSigma+fDSz*i,out[i*Npdf + n],fDSz);
+      }
+
+    // Delete pdfs
+    free(reinterpret_cast<void *>(pdf));
+    return;
+  }
+
+    // Perform convolution
+  void FKTable::CachePDF(extern_pdf inpdf, size_t const& NPDF, real* pdf)
+  {
+    // prepare PDF representation
+    int index = 0;
+    const int NFL = 14;
+    real* EVLN = new real[fNx*NFL];
+    
+    for (int n = 0; n < NPDF; n++)
+    {
+      for (int i = 0; i < fNx; i++)
+        inpdf(fXgrid[i], sqrt(fQ20), n, &EVLN[i*NFL]);
+      
+      for (int fl=0; fl<fNonZero; fl++)
+      {
+        const int fl1 = fFlmap[2*fl];
+        const int fl2 = fFlmap[2*fl+1];
+        
+        for (int i = 0; i < fNx; i++)
+          for (int j = 0; j < fNx; j++)
+            pdf[index++] = EVLN[i*NFL+fl1]*EVLN[j*NFL+fl2];
+      }
+      
+      for (int i=0; i<fPad; i++) // Add padding PDF
+        pdf[index++] = 0;
+      
+    }
+    
+    delete[] EVLN;
+    return;
+  }
+
 
   // GetFKValue returns the appropriate point of the FK table
   int FKTable::GetISig( int const& d,     // Datapoint index
