@@ -29,6 +29,7 @@
 #include "appl_grid/appl_igrid.h"
 
 #include <math.h>
+#include <sys/time.h>
 
 namespace APFELgrid{
 
@@ -181,7 +182,6 @@ namespace APFELgrid{
   double*** alloc_evfactor()
   {
     const int nxin = APFEL::nIntervals();
-    std::cout << "Alloc " << nxin <<std::endl;
     double*** f = new double**[nxin];
     for (int i=0; i<nxin; i++)
     {
@@ -223,6 +223,51 @@ namespace APFELgrid{
           fA[xi][fi][i] = APFEL::ExternalEvolutionOperator(std::string("Ev2Ph"),i-6,fi,xo,xi);
   }
 
+  // ***************************** Progress Monitoring *************************************
+
+  // Counts the number of nonzero elements that have to be combined to produce an FK table.
+  int countElements(appl::grid const& g)
+  {
+    int nElm = 0; // Element counter
+    for (int d=0; d<g.Nobs(); d++)
+      for (size_t pto=0; pto < get_ptord(g); pto++)
+      {
+        const int gidx = get_grid_idx(g, pto);            // APPLgrid grid index
+        appl::igrid const *igrid = g.weightgrid(gidx, d); // APPLgrid igrid pointer
+        const size_t nsubproc = g.subProcesses(gidx);     // Number of subprocesses
+        for (int t=0; t<igrid->Ntau(); t++)     // Loop over scale bins
+          for (int a=0; a<igrid->Ny1(); a++  )  // Loop over x1 bins
+          {
+            int nxlow, nxhigh;  // Trimmed limits
+            get_igrid_limits(igrid, nsubproc, t, a, nxlow, nxhigh);
+            nElm += std::max(0,nxhigh - nxlow + 1);
+          }
+        }
+    return nElm;
+  }
+
+  // Print a status update to screen
+  void statusUpdate(timeval const& t1, int const& totElements, int& compElements)
+  {
+    compElements++;    // Increment computed elements
+    const int interval = compElements< 100 ? 5:10;
+    if (compElements % interval == 0)
+    {
+      // Elapsed time update
+      timeval t2; gettimeofday(&t2, NULL);
+      double elapsedTime = (t2.tv_sec - t1.tv_sec); 
+      elapsedTime += (t2.tv_usec - t1.tv_usec) / 1E6f; 
+
+      // Percentage complete, ETA
+      const double percomp= 100.0*((double)compElements/(double)totElements);
+      const double eta = ( elapsedTime / percomp ) * ( 100.0 - percomp );
+
+      std::cout << "-- "<< std::setw(6) << std::setprecision(4)  << percomp << "\% complete."
+           << " T Elapsed: "  << std::setw(6)<<std::setprecision(4) << elapsedTime/60.0 
+           << " min. ETA: "   << std::setw(6)<<std::setprecision(4) << eta/60.0<<" min.\r";
+      std::cout.flush();
+    }
+  }
 
   // ************************ FK Table computation **************************
   // These functions provide the tools to initialise and generate FK tables.
@@ -286,9 +331,12 @@ namespace APFELgrid{
     double*** fA = alloc_evfactor();
     double*** fB = alloc_evfactor();
   
+    // Progress monitoring
+    int completedElements = 0;
+    const int totalElements = countElements(g);
+    timeval t1; gettimeofday(&t1, NULL);
+
     for (int d=0; d<g.Nobs(); d++)
-    {
-      std::cout << d<<"/"<<g.Nobs() << " points completed "<<std::endl;
       for (size_t pto=0; pto < get_ptord(g); pto++)
       {
         const int gidx = get_grid_idx(g, pto);          // APPLgrid grid index
@@ -349,6 +397,7 @@ namespace APFELgrid{
                         FK->Fill( d, i, j, k, l, norm*W[ip]*H[ip] );
                   }
               }
+              statusUpdate(t1, totalElements, completedElements); // Update progress
             }
           }
         }
@@ -356,7 +405,6 @@ namespace APFELgrid{
         delete[] W;
         delete[] H;
       }
-    }
 
     // Cleanup evolution factors
     free_evfactor(fA);
