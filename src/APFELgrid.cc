@@ -49,18 +49,18 @@ namespace APFELgrid{
       {
         appl::igrid *igrid = const_cast<appl::igrid*>(g.weightgrid(i, j));
         for (int ix1=0; ix1<igrid->Ny1(); ix1++)
-          for (int ix2=0; ix2<igrid->Ny2(); ix2++)
-            for (int t=0; t<igrid->Ntau(); t++) 
-              for (int ip=0; ip<g.subProcesses(i); ip++)
-                {
-                  // Associated weight
-                  const double point_weight = (*(const SparseMatrix3d*) igrid->weightgrid(ip))(t,ix1,ix2);
-                  if ( point_weight != 0 || !nonzero) 
-                  {
-                    xmin = std::min(xmin, igrid->fx(igrid->gety1(ix1)));
-                    xmin = std::min(xmin, igrid->fx(igrid->gety2(ix2)));
-                  }
-                }
+        for (int ix2=0; ix2<igrid->Ny2(); ix2++)
+        for (int t=0; t<igrid->Ntau(); t++) 
+        for (int ip=0; ip<g.subProcesses(i); ip++)
+          {
+            // Associated weight
+            const double point_weight = (*(const SparseMatrix3d*) igrid->weightgrid(ip))(t,ix1,ix2);
+            if ( point_weight != 0 || !nonzero) 
+            {
+              xmin = std::min(xmin, igrid->fx(igrid->gety1(ix1)));
+              xmin = std::min(xmin, igrid->fx(igrid->gety2(ix2)));
+            }
+          }
       }
     
     return xmin;
@@ -114,10 +114,10 @@ namespace APFELgrid{
   }
 
   // Translates 'loop' order to appl::grid index
-  // This is specifically in order to translate aMC@NLO four-part grids
+  // This is specifically in order to translate aMC@NLO-like four-part grids
   // into LO and NLO components.
-  // aMC@NLO convolution uses Born = grid 3
-  //                          NLO  = grid 0
+  // aMC@NLO-like convolution uses Born = grid 3
+  //                               NLO  = grid 0
   int get_grid_idx( appl::grid const& g, int const& pto )
   {
     if (g.calculation() == appl::grid::AMCATNLO)
@@ -337,79 +337,80 @@ namespace APFELgrid{
     timeval t1; gettimeofday(&t1, NULL);
 
     for (int d=0; d<g.Nobs(); d++)
-      for (size_t pto=0; pto < get_ptord(g); pto++)
+    for (size_t pto=0; pto < get_ptord(g); pto++)
+    {
+      const int gidx = get_grid_idx(g, pto);          // APPLgrid grid index
+      appl::appl_pdf *genpdf = get_appl_pdf(g, gidx); // APPLgrid pdf generator
+
+      // Define subprocess weight array W, and parton density array H
+      const size_t nsubproc = g.subProcesses(gidx);
+      double *W = new double[nsubproc];
+      double *H = new double[nsubproc];
+      
+      // Fetch grid pointer
+      appl::igrid const *igrid = g.weightgrid(gidx, d);
+      for (int t=0; t<igrid->Ntau(); t++) // Loop over scale bins
       {
-        const int gidx = get_grid_idx(g, pto);          // APPLgrid grid index
-        appl::appl_pdf *genpdf = get_appl_pdf(g, gidx); // APPLgrid pdf generator
+        const double Q   = sqrt( igrid->fQ2( igrid->gettau(t)) );
+        const double as  = APFEL::AlphaQCD(Q);
 
-        // define subprocess weight array W, and parton density array H
-        const size_t nsubproc = g.subProcesses(gidx);
-        double *W = new double[nsubproc];
-        double *H = new double[nsubproc];
-        
-        // Fetch grid pointer
-        appl::igrid const *igrid = g.weightgrid(gidx, d);
-        for (int t=0; t<igrid->Ntau(); t++) // Loop over scale bins
+        for (int a=0; a<igrid->Ny1(); a++  ) // Loop over x1 bins
         {
-          const double Q   = sqrt( igrid->fQ2( igrid->gettau(t)) );
-          const double as  = APFEL::AlphaQCD(Q);
+          // Get trimmed limits
+          int nxlow, nxhigh;
+          get_igrid_limits(igrid, nsubproc, t, a, nxlow, nxhigh);
+
+          // Compute evolution factors for first PDF, only if there are nonzero weights
+          const double x1 = igrid->fx(igrid->gety1(a));
+          if (nxlow <= nxhigh)
+            compute_evfactors(Q0, Q, x1, fA);
           
-          for (int a=0; a<igrid->Ny1(); a++  ) // Loop over x1 bins
+          for (int b=nxlow; b<=nxhigh; b++) // Loop over x2 bins
           {
-            // Get trimmed limits
-            int nxlow, nxhigh;
-            get_igrid_limits(igrid, nsubproc, t, a, nxlow, nxhigh);
-
-            // Compute evolution factors for first PDF, only if there are nonzero weights
-            const double x1 = igrid->fx(igrid->gety1(a));
-            if (nxlow <= nxhigh)
-              compute_evfactors(Q0, Q, x1, fA);
+            // fetch weight values
+            bool nonzero=false;
+            for (size_t ip=0; ip<nsubproc; ip++)
+              if (( W[ip] = (*(const SparseMatrix3d*) const_cast<appl::igrid*>(igrid)->weightgrid(ip))(t,a,b) )!=0)
+                nonzero=true;
             
-            for (int b=nxlow; b<=nxhigh; b++) // Loop over x2 bins
+            // If nonzero, perform combination
+            if (nonzero)
             {
-              // fetch weight values
-              bool nonzero=false;
-              for (size_t ip=0; ip<nsubproc; ip++)
-                if (( W[ip] = (*(const SparseMatrix3d*) const_cast<appl::igrid*>(igrid)->weightgrid(ip))(t,a,b) )!=0)
-                  nonzero=true;
+              // Calculate normalisation factor
+              const double x2 = igrid->fx(igrid->gety2(b));
+              const double pdfnrm =  pdfwgt ? igrid->weightfun(x1)*igrid->weightfun(x2) : 1.0;
+              const double norm = pdfnrm*compute_wgt_norm(g, d, pto, as, x1, x2);
               
-              // If nonzero, perform combination
-              if (nonzero)
-              {
-                // Calculate normalisation factor
-                const double x2 = igrid->fx(igrid->gety2(b));
-                const double pdfnrm =  pdfwgt ? igrid->weightfun(x1)*igrid->weightfun(x2) : 1.0;
-                const double norm = pdfnrm*compute_wgt_norm(g, d, pto, as, x1, x2);
-                
-                // Compute evolution factors for second PDF
-                compute_evfactors(Q0, Q, x2, fB);
+              // Compute evolution factors for second PDF
+              compute_evfactors(Q0, Q, x2, fB);
 
-                const size_t nxin = APFEL::nIntervals();
-                for (size_t i=0; i<nxin; i++) // Loop over input pdf x1
-                for (size_t j=0; j<nxin; j++) // Loop over input pdf x2
-                for (size_t k=0; k<14; k++) // loop over flavour 1
-                for (size_t l=0; l<14; l++) // loop over flavour 2
-                  {
-                    // Rotate to subprocess basis and fill
-                    genpdf->evaluate(fA[i][k],fB[j][l],H);
-                    for (size_t ip=0; ip<nsubproc; ip++)
-                      if (W[ip] != 0 and H[ip] != 0)
-                        FK->Fill( d, i, j, k, l, norm*W[ip]*H[ip] );
-                  }
-              }
-              statusUpdate(t1, totalElements, completedElements); // Update progress
+              const size_t nxin = APFEL::nIntervals();
+              for (size_t i=0; i<nxin; i++) // Loop over input pdf x1
+              for (size_t j=0; j<nxin; j++) // Loop over input pdf x2
+              for (size_t k=0; k<14; k++) // loop over flavour 1
+              for (size_t l=0; l<14; l++) // loop over flavour 2
+                {
+                  // Rotate to subprocess basis and fill
+                  genpdf->evaluate(fA[i][k],fB[j][l],H);
+                  for (size_t ip=0; ip<nsubproc; ip++)
+                    if (W[ip] != 0 and H[ip] != 0)
+                      FK->Fill( d, i, j, k, l, norm*W[ip]*H[ip] );
+                }
             }
+            statusUpdate(t1, totalElements, completedElements); // Update progress
           }
         }
-        // Free subprocess arrays
-        delete[] W;
-        delete[] H;
       }
+      // Free subprocess arrays
+      delete[] W;
+      delete[] H;
+    }
 
     // Cleanup evolution factors
     free_evfactor(fA);
     free_evfactor(fB);
-  
+
+    std::cout << std::endl;  
     return FK;
   }
 
