@@ -181,6 +181,7 @@ namespace APFELgrid{
   double*** alloc_evfactor()
   {
     const int nxin = APFEL::nIntervals();
+    std::cout << "Alloc " << nxin <<std::endl;
     double*** f = new double**[nxin];
     for (int i=0; i<nxin; i++)
     {
@@ -302,7 +303,6 @@ namespace APFELgrid{
         appl::igrid const *igrid = g.weightgrid(gidx, d);
         for (int t=0; t<igrid->Ntau(); t++) // Loop over scale bins
         {
-        std::cout << t<<"/"<<igrid->Ntau() << " scales completed "<<std::endl;
           const double Q   = sqrt( igrid->fQ2( igrid->gettau(t)) );
           const double as  = APFEL::AlphaQCD(Q);
           
@@ -342,11 +342,11 @@ namespace APFELgrid{
                 for (size_t k=0; k<14; k++) // loop over flavour 1
                 for (size_t l=0; l<14; l++) // loop over flavour 2
                   {
-                    // Rotate to subprocess basis
+                    // Rotate to subprocess basis and fill
                     genpdf->evaluate(fA[i][k],fB[j][l],H);
-
                     for (size_t ip=0; ip<nsubproc; ip++)
-                      FK->Fill( d, i, j, k, l, norm*W[ip]*H[ip] );
+                      if (W[ip] != 0 and H[ip] != 0)
+                        FK->Fill( d, i, j, k, l, norm*W[ip]*H[ip] );
                   }
               }
             }
