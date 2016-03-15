@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	lha_pdf = new double[13];
 
 	// Read FK table
-	std::ifstream infile; infile.open("test.dat");
+	std::ifstream infile; infile.open("./tests/atlas-Z0-rapidity.fk");
 	NNPDF::FKTable FK(infile);
 
 	// Initialise PDF set

@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   APFEL::SetMaxFlavourPDFs(5);
 
   // Read APPLgrid
-  appl::grid g("./grids/atlas-Z0-rapidity.root");
+  appl::grid g("./tests/atlas-Z0-rapidity.root");
 
   // Set x-grid
   APFEL::SetNumberOfGrids(2);
@@ -41,10 +41,10 @@ int main(int argc, char* argv[]) {
   NNPDF::FKTable* FK = APFELgrid::computeFK("ATLASZRAP", g, Q0, false);
 
   // Write FK table to file
-  std::ofstream outfile; outfile.open("test.dat");
+  std::ofstream outfile; outfile.open("./tests/atlas-Z0-rapidity.fk");
   FK->Print(outfile); outfile.close();
   
-   exit(0);
+  exit(0);
 }
 
 
