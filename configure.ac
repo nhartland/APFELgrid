@@ -16,6 +16,7 @@ AM_INIT_AUTOMAKE([subdir-objects])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AX_EXT
 
 # Checks for external libs
 AC_SEARCH_ROOT

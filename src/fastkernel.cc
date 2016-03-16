@@ -32,6 +32,7 @@
 #include <sstream>
 #include <iterator>
 
+#include "APFELgrid/config.h"
 #include "APFELgrid/fastkernel.h"
 #include "APFELgrid/exceptions.h"
 
@@ -44,10 +45,10 @@ namespace NNPDF
   // ***************** Linear convolution *********************
 
 
-#ifdef SSE_CONV
+#ifdef HAVE_SSE3
   #include <pmmintrin.h>
 
-  static inline void convolute(const real* __restrict__ x, const real* __restrict__ y, real& retval, int const& n)
+  static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
   {
     __m128 acc = _mm_setzero_ps();
 
@@ -67,17 +68,21 @@ namespace NNPDF
 
     return;
   }
-
 #else
-
-  // Basic convolution
-  static inline void convolute(const real* __restrict__ pdf,const real* __restrict__ sig,real& retval,int const& n)
+  // Basic single-precision convolution
+  static inline void convolute(const float* __restrict__ pdf, const float* __restrict__ sig, float& retval, int const& n)
   {
     for (int i = 0; i < n; i++)
       retval += pdf[i]*sig[i];
   }
-
 #endif
+
+  // Basic double-precision convolution
+  static inline void convolute(const double* __restrict__ pdf, const double* __restrict__ sig, double& retval, int const& n)
+  {
+    for (int i = 0; i < n; i++)
+      retval += pdf[i]*sig[i];
+  }
 
   // ******************* Helpers ******************************
 
