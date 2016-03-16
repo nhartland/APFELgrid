@@ -21,10 +21,10 @@
 // SOFTWARE.
 
 #include <string>
+#include "fastkernel.h"
 
 // Forward decls
 namespace appl { class grid; }
-namespace NNPDF { class FKTable; }
 
 namespace APFELgrid
 {
@@ -45,5 +45,5 @@ namespace APFELgrid
   // by APFEL, resulting in a new FK table. Required arguments are the name of the produced table 'name', 
   // the appl::grid g, the initial scale for the FK tables Q0, and a boolean specifying whether or not the
   // APPLgrid has PDF weights enabled (this is at the moment impossible to tell from the APPLgrid API) 
-  NNPDF::FKTable* computeFK( std::string const& name, appl::grid const& g, double const& Q0, bool const& pdfwgt );
+  NNPDF::FKTable<double>* computeFK( std::string const& name, appl::grid const& g, double const& Q0, bool const& pdfwgt );
 }

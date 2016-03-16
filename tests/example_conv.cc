@@ -30,10 +30,10 @@ int main(int argc, char* argv[]) {
 
 	// Read FK table
 	std::ifstream infile; infile.open("./tests/atlas-Z0-rapidity.fk");
-	NNPDF::FKTable FK(infile);
+	NNPDF::FKTable<float> FK(infile);
 
 	// Initialise PDF set
-	LHAPDF::initPDFSet("CT10", LHAPDF::LHGRID, 0);
+	LHAPDF::initPDFSet("NNPDF30_nlo_as_0118", LHAPDF::LHGRID, 0);
 	NNPDF::real* results = new NNPDF::real[FK.GetNData()];
 	FK.Convolute(fkpdf, 1, results);
 

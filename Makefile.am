@@ -5,7 +5,7 @@ AM_CPPFLAGS = $(LHAPDF_CPPFLAGS) $(ROOT_CPPFLAGS) $(APFEL_CPPFLAGS) $(APPLGRID_C
 AM_LDFLAGS  = $(LHAPDF_LDFLAGS) $(ROOT_LDFLAGS) $(APFEL_LDFLAGS) $(APPLGRID_LDFLAGS) $(SIMD_FLAGS)
 
 lib_LTLIBRARIES = libAPFELgrid.la
-libAPFELgrid_la_SOURCES = src/APFELgrid.cc src/fastkernel.cc src/fkgenerator.cc
+libAPFELgrid_la_SOURCES = src/APFELgrid.cc src/fk_utils.cc src/fkgenerator.cc
 libAPFELgrid_la_LDFLAGS = -version-info 0:0:0
 libAPFELgrid_la_CXXFLAGS = $(AM_CXXFLAGS)
 libAPFELgrid_la_CPPFLAGS = $(AM_CPPFLAGS)

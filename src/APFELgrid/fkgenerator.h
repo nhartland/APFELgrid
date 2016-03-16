@@ -33,7 +33,7 @@ namespace NNPDF
     * \class FKGenerator
     * \brief Class for filling FastKernel tables
     */
-    class FKGenerator : public FKTable
+    class FKGenerator : public FKTable<double>
     {
       private:
         FKGenerator();                          //!< Disable default constructor

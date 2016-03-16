@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   APFEL::SetGridParameters(2,15,5,1e-1);
 
   // Generate FK table
-  NNPDF::FKTable* FK = APFELgrid::computeFK("ATLASZRAP", g, Q0, false);
+  NNPDF::FKTable<double>* FK = APFELgrid::computeFK("ATLASZRAP", g, Q0, false);
 
   // Write FK table to file
   std::ofstream outfile; outfile.open("./tests/atlas-Z0-rapidity.fk");
