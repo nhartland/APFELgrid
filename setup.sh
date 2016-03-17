@@ -39,7 +39,7 @@ echo
 echo "Headers supplemented, proceeding to installation in APFEL directory: "$PREFIX
 echo
 autoreconf -i
-./configure --prefi=$PREFIX
+./configure --prefix=$PREFIX
 make && make check && make install
 
 exit 1
