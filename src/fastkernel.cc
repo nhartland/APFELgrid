@@ -771,7 +771,7 @@ namespace NNPDF
     real *pdf = 0;
     int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(real)*fDSz*Npdf);
     if (err != 0)
-      throw RangeError("FKTable::Convolute","ThPredictions posix_memalign " + std::to_string(err));
+      throw RangeError("FKTable::Convolute","ThPredictions posix_memalign " + ToString(err));
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
