@@ -60,8 +60,8 @@ namespace NNPDF
         virtual ~FKTable(); //!< Destructor
         void Print(std::ostream&); //!< Print FKTable header to ostream
 
-        typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, real* pdf);
-        void Convolute(extern_pdf pdf, size_t const& NPDF, real* out);
+        typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, T* pdf);
+        void Convolute(extern_pdf pdf, size_t const& NPDF, T* out);
 
         // ******************** FK Get Methods ***************************
 
@@ -77,7 +77,7 @@ namespace NNPDF
         int const&   GetPad()     const { return fPad;  }  //!< Return fPad
 
         double *  GetXGrid() const { return fXgrid;   }  //!< Return fXGrid
-        real   *  GetSigma() const { return fSigma;   }  //!< Return fSigma
+        T   *  GetSigma() const { return fSigma;   }  //!< Return fSigma
 
         int *   GetFlmap()   const { return fFlmap;   }  //!< Return fFlmap
         int const&   GetNonZero() const { return fNonZero; }  //!< Return fNonZero
@@ -125,7 +125,7 @@ namespace NNPDF
         double *const fXgrid;
 
         // FK table
-        real *const fSigma;
+        T *const fSigma;
 
         // Cfactor information
         const bool fHasCFactors;
@@ -136,7 +136,7 @@ namespace NNPDF
         FKTable& operator=(const FKTable&); //!< Disable copy-assignment
 
         void InitialiseFromStream(std::istream&, std::vector<std::string> const& cFactors); //!< Initialise the FK table from an input stream
-        void CachePDF(extern_pdf inpdf, size_t const& NPDF, real* pdf); // Cache PDF for convolution
+        void CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf); // Cache PDF for convolution
 
         int parseNonZero(); // Parse flavourmap information into fNonZero
     };
@@ -149,7 +149,6 @@ namespace NNPDF
 
   static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
   {
-    std::cout << "Accessing SSEconv " <<std::endl;
     __m128 acc = _mm_setzero_ps();
 
     const __m128* a = (const __m128*) x;
@@ -209,7 +208,7 @@ namespace NNPDF
   fPad((fRmr == 0) ? 0:convoluteAlign - fRmr ),
   fDSz( fTx*fNonZero + fPad ),
   fXgrid(new double[fNx]),
-  fSigma( new real[fDSz*fNData]),
+  fSigma( new T[fDSz*fNData]),
   fHasCFactors(cFactors.size()),
   fcFactors(new double[fNData])
   {
@@ -239,7 +238,7 @@ namespace NNPDF
   fPad((fRmr == 0) ? 0:convoluteAlign - fRmr ),
   fDSz( fTx*fNonZero + fPad ),
   fXgrid(new double[fNx]),
-  fSigma( new real[fDSz*fNData]),
+  fSigma( new T[fDSz*fNData]),
   fHasCFactors(cFactors.size()),
   fcFactors(new double[fNData])
   {
@@ -265,7 +264,7 @@ namespace NNPDF
   fPad(set.fPad),
   fDSz(set.fDSz),
   fXgrid(new double[fNx]),
-  fSigma(new real[fDSz*fNData]),
+  fSigma(new T[fDSz*fNData]),
   fHasCFactors(set.fHasCFactors),
   fcFactors(new double[fNData])
   {
@@ -317,7 +316,7 @@ namespace NNPDF
   fPad(set.fPad),
   fDSz(set.fDSz),
   fXgrid(new double[fNx]),
-  fSigma(new real[fDSz*fNData]),
+  fSigma(new T[fDSz*fNData]),
   fHasCFactors(set.fHasCFactors),
   fcFactors(new double[fNData])
   {
@@ -442,7 +441,7 @@ namespace NNPDF
 
     // Read FastKernel Table
     std::string line;
-    std::vector<real> datasplit;
+    std::vector<T> datasplit;
 
     if (fHadronic) {
       while (getline(is,line))
@@ -593,7 +592,7 @@ namespace NNPDF
     }
 
     // Read C-factors
-    getline(g,line); real tmp;
+    getline(g,line); T tmp;
     for (int i = 0; i < fNData; i++)
     {
       g >> tmp;
@@ -605,11 +604,11 @@ namespace NNPDF
 
   // Perform convolution
   template<typename T>
-  void FKTable<T>::Convolute(extern_pdf inpdf, size_t const& Npdf, real* out)
+  void FKTable<T>::Convolute(extern_pdf inpdf, size_t const& Npdf, T* out)
   {
     // Fetch PDF array
-    real *pdf = 0;
-    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(real)*fDSz*Npdf);
+    T *pdf = 0;
+    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(T)*fDSz*Npdf);
     if (err != 0)
       throw RangeError("FKTable::Convolute","ThPredictions posix_memalign " + std::to_string(err));
     CachePDF(inpdf, Npdf, pdf);
@@ -630,12 +629,12 @@ namespace NNPDF
 
   // Perform convolution
   template<typename T>
-  void FKTable<T>::CachePDF(extern_pdf inpdf, size_t const& NPDF, real* pdf)
+  void FKTable<T>::CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf)
   {
     // prepare PDF representation
     int index = 0;
     const int NFL = 14;
-    real* EVLN = new real[fNx*NFL];
+    T* EVLN = new T[fNx*NFL];
     
     for (size_t n = 0; n < NPDF; n++)
     {
@@ -664,12 +663,12 @@ namespace NNPDF
 
   // GetFKValue returns the appropriate point of the FK table
   template<typename T>
-  int FKTable<T>::GetISig( int const& d,     // Datapoint index
-                        int const& a,   // First x-index
-                        int const& b,   // Second x-index
-                        int const& ifl1,  // First flavour index
-                        int const& ifl2   // Second flavour index
-                      ) const
+  int FKTable<T>::GetISig   (   int const& d,     // Datapoint index
+                                int const& a,   // First x-index
+                                int const& b,   // Second x-index
+                                int const& ifl1,  // First flavour index
+                                int const& ifl2   // Second flavour index
+                            ) const
   {
 
     if (!fHadronic)
