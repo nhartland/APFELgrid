@@ -11,7 +11,7 @@ AC_CONFIG_SRCDIR([src/APFELgrid.cc])
 AC_CONFIG_HEADERS([src/APFELgrid/config.h])
 
 AC_CONFIG_FILES([Makefile src/APFELgrid/common.h])
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([serial-tests subdir-objects])
 
 # Checks for programs.
 AC_PROG_CXX
