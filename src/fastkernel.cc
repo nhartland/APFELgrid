@@ -136,7 +136,7 @@ namespace NNPDF
   FKHeader::FKHeader(std::string const& filename)
   {
     std::ifstream instream;
-    instream.open(filename);
+    instream.open(filename.c_str());
 
     if (!instream.good())
         throw FileError("FKHeader::FKHeader","cannot open FK grid file: " + filename);
@@ -378,7 +378,7 @@ namespace NNPDF
   fHasCFactors(cFactors.size()),
   fcFactors(new double[fNData])
   {
-    std::ifstream is(filename);
+    std::ifstream is(filename.c_str());
     NNPDF::FKHeader headSkip(is);
     InitialiseFromStream(is, cFactors);
   };
@@ -463,13 +463,13 @@ namespace NNPDF
 
     // Sanity checks
     if ( fNData <= 0 )
-      throw RangeError("FKTable::FKTable","Number of datapoints is set to: " + std::to_string(fNData) );
+      throw RangeError("FKTable::FKTable","Number of datapoints is set to: " + ToString(fNData) );
     
     if ( fNx <= 0 )
-      throw RangeError("FKTable::FKTable","Number of x-points is set to: " + std::to_string(fNx) );
+      throw RangeError("FKTable::FKTable","Number of x-points is set to: " + ToString(fNx) );
     
     if ( fNonZero <= 0 )
-      throw RangeError("FKTable::FKTable","Number of nonzero flavours is set to: " + std::to_string(fNonZero) );
+      throw RangeError("FKTable::FKTable","Number of nonzero flavours is set to: " + ToString(fNonZero) );
 
     if (Verbose)
       std::cout << fNData << " Data Points "
