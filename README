@@ -4,17 +4,37 @@ Code and examples for the APFELgrid plugin.
 Requirements
 ------------
 **APFEL** master
+(github.com/scarrazza/apfel)
 
-**APPLgrid** 1.4.70 modified such that all headers are installed
+**LHAPDF** 6.X.X
+(lhapdf.hepforge.org)
+
+**APPLgrid** 1.4.70 
+(applgrid.hepforge.org)
+
+This must be modified such that all headers are installed
 (simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)
 
-How to run the example
+Installation and tests
 ----------------------
-For the example to run correctly, first you need to download
-the required APPLgrid files, by running the script **/grids/fetchTest.sh**.
+A bootstrap script is provided which downloads and installs the relevant APPLgrid headers,
+detects the path of APFEL and configures and compiles the package for installation there.
 
-Once complete, enter
+To use this script and install to the default directory type
 
-*make*
+	./setup.sh
+	make install
 
-*./example*
+Alternatively, the APPLgrid headers may be installed manually as specified above, and the
+installation performed in the typical autotools fashion
+
+	(autoreconf -i)
+	./configure
+	make
+	make install
+
+A few tests can be performed upon the package with
+
+	make check
+
+this is automatically executed by the boostrap script.
