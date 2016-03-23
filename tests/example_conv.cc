@@ -18,10 +18,10 @@
 
 extern "C" void evolvepdf_(const double& , const double& , double* );
 static double* lha_pdf;
-void fkpdf (const double& x, const double& Q, const size_t& n, NNPDF::real* pdf)
+void fkpdf (const double& x, const double& Q, const size_t& n, float* pdf)
 {
   evolvepdf_(x,Q,lha_pdf);
-  NNPDF::LHA2EVLN<double>(lha_pdf, pdf);
+  NNPDF::LHA2EVLN<double, float>(lha_pdf, pdf);
 }
 
 int main(int argc, char* argv[]) {
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialise PDF set
 	LHAPDF::initPDFSet("NNPDF30_nlo_as_0118", LHAPDF::LHGRID, 0);
-	NNPDF::real* results = new NNPDF::real[FK.GetNData()];
+	float* results = new float[FK.GetNData()];
 	FK.Convolute(fkpdf, 1, results);
 
 	for (int i=0; i < FK.GetNData(); i++)

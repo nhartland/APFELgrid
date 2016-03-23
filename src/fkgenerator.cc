@@ -47,7 +47,7 @@ namespace NNPDF
                             int const& ix2,   // Second x-index
                             size_t const& ifl1,  // First flavour index
                             size_t const& ifl2,  // Second flavour index
-                            real const& fk  // FK Value
+                            double const& fk  // FK Value
                           )
   {
 
@@ -83,7 +83,7 @@ namespace NNPDF
   void FKGenerator::Fill( int const& d,     // Datapoint index
                           int const& ix,    // x-index
                           size_t const& ifl,   // flavour index
-                          real const& fk  // FK Value
+                          double const& fk  // FK Value
                         )
   {
 

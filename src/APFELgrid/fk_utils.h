@@ -30,8 +30,6 @@
 
 #include <map>
 
-#include "common.h"
-
 namespace NNPDF
 {
     /**

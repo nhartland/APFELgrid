@@ -14,26 +14,26 @@ namespace NNPDF
    * \param LHA the les houches 13 pdfs
    * \return evln the lha in the evln basis
    */
-  template<class A>
-  void LHA2EVLN(const A *LHA, real *EVLN)
+  template<class inType, class outType>
+  void LHA2EVLN(const inType *LHA, outType *EVLN)
   {
-    const real uplus = LHA[U] + LHA[UBAR];
-    const real uminus = LHA[U] - LHA[UBAR];
+    const outType uplus = LHA[U] + LHA[UBAR];
+    const outType uminus = LHA[U] - LHA[UBAR];
     
-    const real dplus = LHA[D] + LHA[DBAR];
-    const real dminus = LHA[D] - LHA[DBAR];
+    const outType dplus = LHA[D] + LHA[DBAR];
+    const outType dminus = LHA[D] - LHA[DBAR];
     
-    const real cplus = LHA[C] + LHA[CBAR];
-    const real cminus = LHA[C] - LHA[CBAR];
+    const outType cplus = LHA[C] + LHA[CBAR];
+    const outType cminus = LHA[C] - LHA[CBAR];
     
-    const real splus = LHA[S] + LHA[SBAR];
-    const real sminus = LHA[S] - LHA[SBAR];
+    const outType splus = LHA[S] + LHA[SBAR];
+    const outType sminus = LHA[S] - LHA[SBAR];
     
-    const real tplus = LHA[T] + LHA[TBAR];
-    const real tminus = LHA[T] - LHA[TBAR];
+    const outType tplus = LHA[T] + LHA[TBAR];
+    const outType tminus = LHA[T] - LHA[TBAR];
     
-    const real bplus = LHA[B] + LHA[BBAR];
-    const real bminus = LHA[B] - LHA[BBAR];
+    const outType bplus = LHA[B] + LHA[BBAR];
+    const outType bminus = LHA[B] - LHA[BBAR];
 
     EVLN[0]= LHA[PHT]; // photon
     EVLN[1]=(uplus + dplus + cplus + splus + tplus + bplus); //Singlet

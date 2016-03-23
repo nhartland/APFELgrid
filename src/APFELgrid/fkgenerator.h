@@ -24,7 +24,6 @@
 
 #include <string>
 #include <vector>
-#include "common.h"
 #include "fastkernel.h"
 
 namespace NNPDF
@@ -50,14 +49,14 @@ namespace NNPDF
                     int const& ix2,   // Second x-index
                     size_t const& ifl1,  // First flavour index
                     size_t const& ifl2,  // Second flavour index
-                    real const& isig  // FK Value
+                    double const& isig  // FK Value
                   );
 
         // DIS version of Fill
         void Fill(  int const& d,     // Datapoint index
                     int const& ix,    // x-index
                     size_t const& ifl,   // flavour index
-                    real const& isig  // FK Value
+                    double const& isig  // FK Value
                   );
     };
 
