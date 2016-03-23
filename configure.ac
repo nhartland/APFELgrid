@@ -10,7 +10,7 @@ LT_INIT()
 AC_CONFIG_SRCDIR([src/APFELgrid.cc])
 AC_CONFIG_HEADERS([src/APFELgrid/config.h])
 
-AC_CONFIG_FILES([Makefile src/APFELgrid/fastkernel.h])
+AC_CONFIG_FILES([Makefile])
 AM_INIT_AUTOMAKE([serial-tests subdir-objects])
 
 # Checks for programs.

@@ -40,7 +40,7 @@ namespace NNPDF
 
     static const bool Verbose = true;
     template<class T> static int convoluteAlign() { return 1; };
-    template<> int convoluteAlign<float>() { return 4; }; 
+    template<> int convoluteAlign<float>() { return 4; }; // Doesn't hurt even without SSE
 
    /**
     * \class FKTable
@@ -430,7 +430,7 @@ namespace NNPDF
     if (Verbose)
       std::cout << fNData << " Data Points "
       << fNx << " X points "
-      << fNonZero << " active flavours"<<std::endl;
+      << fNonZero << " active flavours " << std::endl;
 
 
     // Zero sigma array -> also zeros pad quantities
