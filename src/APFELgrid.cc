@@ -44,14 +44,14 @@ namespace NNPDF{
                           )
   {
     if (fk==0) return;
-    if (d >= fNData) throw RangeError("FKGenerator::Fill","datapoint " + ToString(d) + "out of bounds.");
-    if (ix1 >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix1) + " out of bounds.");
-    if (ix2 >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix2) + " out of bounds.");
-    if (ifl1 >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl1) + " out of bounds.");
-    if (ifl2 >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl2) + " out of bounds.");
+    if (d >= fNData) throw std::runtime_error("FKGenerator::Fill datapoint " + ToString(d) + "out of bounds.");
+    if (ix1 >= fNx) throw std::runtime_error("FKGenerator::Fill xpoint " + ToString(ix1) + " out of bounds.");
+    if (ix2 >= fNx) throw std::runtime_error("FKGenerator::Fill xpoint " + ToString(ix2) + " out of bounds.");
+    if (ifl1 >= 14) throw std::runtime_error("FKGenerator::Fill flavour " + ToString(ifl1) + " out of bounds.");
+    if (ifl2 >= 14) throw std::runtime_error("FKGenerator::Fill flavour " + ToString(ifl2) + " out of bounds.");
     // pointer to FKTable segment
     const size_t iSig = GetISig(d, ix1, ix2, ifl1, ifl2);
-    if (iSig == -1) throw RangeError("FKGenerator::Fill","Cannot find FK table point!");
+    if (iSig == -1) throw std::runtime_error("FKGenerator::Fill Cannot find FK table point!");
     // Assign FK Table
     fSigma[iSig] += fk;
     return;
@@ -65,12 +65,12 @@ namespace NNPDF{
                         )
   {
     if (fk==0) return;
-    if (d >= fNData) throw RangeError("FKGenerator::Fill","datapoint " + ToString(d) + " out of bounds.");
-    if (ix >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix) + " out of bounds.");
-    if (ifl >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl) + " out of bounds.");
+    if (d >= fNData) throw std::runtime_error("FKGenerator::Fill datapoint " + ToString(d) + " out of bounds.");
+    if (ix >= fNx) throw std::runtime_error("FKGenerator::Fill xpoint " + ToString(ix) + " out of bounds.");
+    if (ifl >= 14) throw std::runtime_error("FKGenerator::Fill flavour " + ToString(ifl) + " out of bounds.");
     // pointer to FKTable segment
     const size_t iSig = GetISig(d, ix, ifl);
-    if (iSig == -1) throw RangeError("FKGenerator::Fill", "Cannot find FK table point!");
+    if (iSig == -1) throw std::runtime_error("FKGenerator::Fill Cannot find FK table point!");
     // Assign FK Table
     fSigma[iSig] += fk;
     return;

@@ -33,8 +33,6 @@
 #include <cmath>
 #include <map>
 
-#include "exceptions.h"
-
 namespace NNPDF
 {
 
@@ -259,7 +257,7 @@ namespace NNPDF
     instream.open(filename);
 
     if (!instream.good())
-        throw FileError("FKHeader::FKHeader","cannot open FK grid file: " + filename);
+        throw std::runtime_error("FKHeader::FKHeader cannot open FK grid file: " + filename);
 
     Read(instream);
   }
@@ -272,7 +270,7 @@ namespace NNPDF
   inline void FKHeader::Read(std::istream& is) 
   {
     if (!is.good())
-        throw FileError("FKHeader::FKHeader","cannot open FK grid file ");
+        throw std::runtime_error("FKHeader::FKHeader cannot open FK grid file");
 
     int peekval = (is >> std::ws).peek();
     while  ( peekval == FK_DELIN_SEC ||
@@ -338,7 +336,7 @@ namespace NNPDF
     keyMap::const_iterator iMap = (*tMap).find(key);
       
     if (iMap != (*tMap).end())
-      throw FileError("FKHeader::AddTag","key clash: " + key);
+      throw std::runtime_error("FKHeader::AddTag key clash: " + key);
 
     // trim trailing characters
     const size_t trimpos = std::min(value.size(), value.find_last_not_of(" \t\n\r")+1);
@@ -363,7 +361,7 @@ namespace NNPDF
       if (iMap != (*tMap).end())
           return (*iMap).second;
       else
-          throw FileError("FKHeader::GetTag","key " + key + " not found in header!");
+          throw std::runtime_error("FKHeader::GetTag key " + key + " not found in header!");
 
       return std::string();
   }
@@ -373,7 +371,7 @@ namespace NNPDF
     if (title.compare("VersionInfo") == 0) return FKHeader::VERSIONS;
     if (title.compare("GridInfo") == 0) return FKHeader::GRIDINFO;
     if (title.compare("TheoryInfo") == 0) return FKHeader::THEORYINFO;
-    throw FileError("FKHeader::GetSection","Unrecognised section title: " + title);
+    throw std::runtime_error("FKHeader::GetSection Unrecognised section title: " + title);
     return BLOB;
   }
 
@@ -397,7 +395,7 @@ namespace NNPDF
     if (iTag != (*tMap).end())
       (*tMap).erase(iTag);
     else
-      throw FileError("FKHeader::RemTag", "key " + key + " not found in header!");
+      throw std::runtime_error("FKHeader::RemTag key " + key + " not found in header!");
   }
 
 
@@ -437,7 +435,7 @@ namespace NNPDF
     if (iBlob != fBlobString.end())
     { os << (*iBlob).second << std::endl; }
     else
-      throw InitError("FKHeader::PrintBlob","Blob " + blobname + " not initialised");
+      throw std::runtime_error("FKHeader::PrintBlob Blob " + blobname + " not initialised");
   }
 
   inline void FKHeader::ReadBlob(std::istream& is, std::string blobname)
@@ -642,7 +640,7 @@ namespace NNPDF
   fcFactors(new double[fNData])
   {
      if (fNData == 0)
-       throw RangeError("FKTable::FKTable", "datapoints cut to 0!");
+       throw std::runtime_error("FKTable::FKTable datapoints cut to 0!");
 
     // Copy X grid
     for (int i = 0; i < fNx; i++)
@@ -737,13 +735,13 @@ namespace NNPDF
 
     // Sanity checks
     if ( fNData <= 0 )
-      throw RangeError("FKTable::FKTable","Number of datapoints is set to: " + std::to_string(fNData) );
+      throw std::runtime_error("FKTable::FKTable Number of datapoints is set to: " + std::to_string(fNData) );
     
     if ( fNx <= 0 )
-      throw RangeError("FKTable::FKTable","Number of x-points is set to: " + std::to_string(fNx) );
+      throw std::runtime_error("FKTable::FKTable Number of x-points is set to: " + std::to_string(fNx) );
     
     if ( fNonZero <= 0 )
-      throw RangeError("FKTable::FKTable","Number of nonzero flavours is set to: " + std::to_string(fNonZero) );
+      throw std::runtime_error("FKTable::FKTable Number of nonzero flavours is set to: " + std::to_string(fNonZero) );
 
     if (Verbose)
       std::cout << fNData << " Data Points "
@@ -818,7 +816,7 @@ namespace NNPDF
 
     // Check that stream is still good
     if (!os.good())
-      throw FileError("FKTable::Print","no good outstream!");
+      throw std::runtime_error("FKTable::Print no good outstream!");
 
     if (fHasCFactors != 0)
     {
@@ -899,7 +897,7 @@ namespace NNPDF
     std::fstream g;
     g.open(cfilename.c_str(), std::ios::in);
     if (g.fail())
-      throw FileError("FKTable::FKTable","cannot open cfactor file: " + cfilename);
+      throw std::runtime_error("FKTable::FKTable cannot open cfactor file: " + cfilename);
 
     // Read through header
     std::string line;
@@ -931,7 +929,7 @@ namespace NNPDF
     T *pdf = 0;
     int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(T)*fDSz*Npdf);
     if (err != 0)
-      throw RangeError("FKTable::Convolute","ThPredictions posix_memalign " + std::to_string(err));
+      throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + std::to_string(err));
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
@@ -993,7 +991,7 @@ namespace NNPDF
   {
 
     if (!fHadronic)
-      throw EvaluationError("FKTable::GetISig","Hadronic call for DIS table!");
+      throw std::runtime_error("FKTable::GetISig Hadronic call for DIS table!");
 
     // Identify which nonZero flavour ifl1 and ifl2 correspond to
     int j = -1;
@@ -1029,7 +1027,7 @@ namespace NNPDF
   {
 
     if (fHadronic)
-      throw EvaluationError("FKTable::GetISig","DIS call for Hadronic table!");
+      throw std::runtime_error("FKTable::GetISig DIS call for Hadronic table!");
 
     // Identify which nonZero flavour ifl corresponds to
     int j = -1;
@@ -1130,7 +1128,7 @@ namespace NNPDF
     {
 
       if (!fmBlob.good())
-        throw RangeError("FKTable::parseNonZero","FlavourMap formatting error!");
+        throw std::runtime_error("FKTable::parseNonZero FlavourMap formatting error!");
 
       if (!fHadronic)
       {
@@ -1146,7 +1144,7 @@ namespace NNPDF
             nNonZero += iNonZero;
           }
           else
-            throw RangeError("FKTable::parseNonZero","FlavourMap formatting error!");
+            throw std::runtime_error("FKTable::parseNonZero FlavourMap formatting error!");
       }
     }
 
