@@ -47,3 +47,38 @@ namespace APFELgrid
   // APPLgrid has PDF weights enabled (this is at the moment impossible to tell from the APPLgrid API) 
   NNPDF::FKTable<double>* computeFK( std::string const& name, appl::grid const& g, double const& Q0, bool const& pdfwgt );
 }
+
+namespace NNPDF
+{
+    /**
+    * \class FKGenerator
+    * \brief Class for filling FastKernel tables
+    */
+    class FKGenerator : public FKTable<double>
+    {
+      private:
+        FKGenerator();                          //!< Disable default constructor
+        FKGenerator( const FKGenerator& );      //!< Disable default copy-constructor
+        FKGenerator& operator=(const FKGenerator&); //!< Disable copy-assignment
+
+      public:
+        FKGenerator( std::istream& ); // Constructor
+        virtual ~FKGenerator(); //!< Destructor
+
+         // Fill the FKTable
+        void Fill(  int const& d,     // Datapoint index
+                    int const& ix1,   // First x-index
+                    int const& ix2,   // Second x-index
+                    size_t const& ifl1,  // First flavour index
+                    size_t const& ifl2,  // Second flavour index
+                    double const& isig  // FK Value
+                  );
+
+        // DIS version of Fill
+        void Fill(  int const& d,     // Datapoint index
+                    int const& ix,    // x-index
+                    size_t const& ifl,   // flavour index
+                    double const& isig  // FK Value
+                  );
+    };
+}

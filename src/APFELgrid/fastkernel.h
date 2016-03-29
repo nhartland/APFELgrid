@@ -31,8 +31,8 @@
 #include <iomanip>
 #include <iostream>
 #include <cmath>
+#include <map>
 
-#include "fk_utils.h"
 #include "exceptions.h"
 
 namespace NNPDF
@@ -41,6 +41,99 @@ namespace NNPDF
     static const bool Verbose = true;
     template<class T> static int convoluteAlign() { return 1; };
     template<> int convoluteAlign<float>() { return 4; }; // Doesn't hurt even without SSE
+
+    /**
+     * Replacement for std::tostring
+     */
+    template <typename T>
+    std::string ToString(T val)
+    {
+        std::stringstream stream;
+        stream << val;
+        return stream.str();
+    }
+
+    /**
+     * Split std::string into std::vector
+     */
+    template<typename T>
+    static void split(std::vector<T>& results, std::string const& input)
+    {
+        std::stringstream strstr(input);
+        std::istream_iterator<T> it(strstr);
+        std::istream_iterator<T> end;
+        results.assign(it, end);
+        return;
+    }
+
+  // *********************************************************
+    // Section delineators for FK headers
+    static const int FK_DELIN_SEC = std::char_traits<char>::to_int_type('_');
+    static const int FK_DELIN_BLB = std::char_traits<char>::to_int_type('{');
+    static const int FK_DELIN_KEY = std::char_traits<char>::to_int_type('*');
+  // *********************************************************
+
+   /**
+    * \class FKHeader 
+    * \brief Class for parsing the header of FK tables
+    */
+    class FKHeader
+    {
+    public:
+        FKHeader();   //!< Prototype constructor
+        FKHeader(std::istream&);                  //!< Construct from istream
+        FKHeader(std::string const& filename);   //!< Construct from file
+        FKHeader(FKHeader const&);               //!< Copy-construct
+        ~FKHeader();                             //!< Destructor
+
+        void Read(std::istream&);  //!< Read FKTable header from ostream
+        void Print(std::ostream&) const; //!< Print FKTable header to ostream
+
+        typedef std::map<std::string, std::string> keyMap;
+        typedef enum {VERSIONS, GRIDINFO, THEORYINFO, BLOB} section;
+
+        // ********************************* Tag Manip *********************************
+
+        template<typename T>
+        void AddTag( section sec, std::string const& key, T const& value)
+        { AddTag(sec, key,ToString(value)); }
+        void AddTag( section sec, std::string const& key, const char* value)
+        { AddTag(sec, key,ToString(value));}
+        void AddTag( section sec, std::string const& key, std::string const& value);
+
+        // ********************************* Tag Getters *********************************
+
+        bool HasTag( section sec, std::string const& key ) const; 
+        std::string GetTag( section sec, std::string const& key) const;
+        template<typename T> T GetTag( section sec, std::string const& key) const
+        { return static_cast<T>(atof(GetTag(sec,key).c_str())); }
+
+    protected:
+        // Printing helper functions
+        std::string SectionHeader(const char* title, section) const;
+
+        void PrintKeyValue(std::ostream&, section) const;
+        void ReadKeyValue( std::istream& is, section sec );
+
+        void PrintBlob(std::ostream& os, std::string blobname) const;
+        void ReadBlob(std::istream& is, std::string blobname);
+
+        // Map fetchers helper functions
+        static section GetSection(std::string const&);   //!< Fetch the appropriate section for a title
+        const keyMap* GetMap(section const& sec) const; //!< Fetch the appropriate map for a section
+        keyMap* GetMap(section const& sec)              //!< Fetch the appropriate map for a section
+        { return const_cast<keyMap*>(const_cast<const FKHeader*>(this)->GetMap(sec)); };
+
+        void RemTag( section sec, std::string const& key ); //!< Remove existing tags
+
+        // ********************************* Attributes *********************************
+
+        // Key-value pairs
+        keyMap fVersions;
+        keyMap fGridInfo;
+        keyMap fTheoryInfo;
+        keyMap fBlobString;
+    };
 
    /**
     * \class FKTable
@@ -79,17 +172,15 @@ namespace NNPDF
         int const&   GetDSz()     const { return fDSz;  }  //!< Return fDSz
         int const&   GetPad()     const { return fPad;  }  //!< Return fPad
 
-        double *  GetXGrid() const { return fXgrid;   }  //!< Return fXGrid
-        T   *  GetSigma() const { return fSigma;   }  //!< Return fSigma
+        double*  GetXGrid() const { return fXgrid; }  //!< Return fXGrid
+        T*       GetSigma() const { return fSigma; }  //!< Return fSigma
 
-        int *   GetFlmap()   const { return fFlmap;   }  //!< Return fFlmap
-        int const&   GetNonZero() const { return fNonZero; }  //!< Return fNonZero
-
-        bool const& IsHadronic()  const { return fHadronic;}  //!< Return fHadronic
+        int*     GetFlmap()   const { return fFlmap; }          //!< Return fFlmap
+        int const&   GetNonZero() const { return fNonZero; }    //!< Return fNonZero
+        bool const&   IsHadronic()  const { return fHadronic;}  //!< Return fHadronic
 
       protected:
         void ReadCFactors(std::string const& filename); //!< Read C-factors from file
-
         bool OptimalFlavourmap(std::string& flmap) const; //!< Determine and return the optimal flavour map
 
         // GetISig returns a position in the FK table
@@ -144,8 +235,235 @@ namespace NNPDF
         int parseNonZero(); // Parse flavourmap information into fNonZero
     };
 
- // **********************************************************************************
+  // ******************************** Header class ***************************************
 
+  /**
+  * @brief Prototype Constructor for FKHeader class - to be used only for constructing new FK tables
+  * @param filename The FK table filename
+  */
+  inline FKHeader::FKHeader()  { }
+  inline FKHeader::~FKHeader() { }
+  /**
+  * @brief Constructor for FK header parsing class
+  * @param str The input stream
+  */
+  inline FKHeader::FKHeader(std::istream& str) { Read(str); }
+
+    /**
+  * @brief Constructor for FK header parsing class
+  * @param filename The FK table filename
+  */
+  inline FKHeader::FKHeader(std::string const& filename)
+  {
+    std::ifstream instream;
+    instream.open(filename);
+
+    if (!instream.good())
+        throw FileError("FKHeader::FKHeader","cannot open FK grid file: " + filename);
+
+    Read(instream);
+  }
+
+  inline FKHeader::FKHeader(FKHeader const& ref):
+  fVersions(ref.fVersions),
+  fGridInfo(ref.fGridInfo),
+  fTheoryInfo(ref.fTheoryInfo) {}
+
+  inline void FKHeader::Read(std::istream& is) 
+  {
+    if (!is.good())
+        throw FileError("FKHeader::FKHeader","cannot open FK grid file ");
+
+    int peekval = (is >> std::ws).peek();
+    while  ( peekval == FK_DELIN_SEC ||
+             peekval == FK_DELIN_BLB )
+    {
+      std::string sectionTitle; getline( is, sectionTitle );
+      // Remove delineating character and trailing underscores
+      sectionTitle = sectionTitle.substr(1, sectionTitle.size());
+      sectionTitle.erase(std::remove(sectionTitle.begin(), sectionTitle.end(), '_'), sectionTitle.end());
+
+      // Terminating case
+      if (sectionTitle.compare("FastKernel") == 0)
+        return;
+
+      // Blob read
+      if (peekval == FK_DELIN_BLB)
+        ReadBlob(is, sectionTitle);
+      else
+        ReadKeyValue(is, GetSection(sectionTitle));
+
+      // Re-peek
+      peekval = (is >> std::ws).peek();
+    }
+  }
+
+  inline void FKHeader::Print(std::ostream& out) const
+  {
+    out << SectionHeader("GridDesc", BLOB)<<std::endl;
+    PrintBlob(out, "GridDesc");
+
+    out << SectionHeader("VersionInfo", VERSIONS)<<std::endl;
+    PrintKeyValue(out, VERSIONS);
+
+    // Print nonstandard blobs
+    keyMap::const_iterator iBlob = fBlobString.begin();
+    for (;iBlob != fBlobString.end(); iBlob++)
+      if ((*iBlob).first.compare("GridDesc") != 0)
+      if ((*iBlob).first.compare("FlavourMap") != 0)
+      if ((*iBlob).first.compare("xGrid") != 0)
+        {
+          out << SectionHeader((*iBlob).first.c_str(), BLOB)<<std::endl;
+          PrintBlob(out, (*iBlob).first);
+        }
+
+    out << SectionHeader("GridInfo", GRIDINFO)<<std::endl;
+    PrintKeyValue(out, GRIDINFO);
+
+    out << SectionHeader("FlavourMap", BLOB)<<std::endl;
+    PrintBlob(out, "FlavourMap");
+
+    out << SectionHeader("TheoryInfo", THEORYINFO)<<std::endl;
+    PrintKeyValue(out, THEORYINFO);
+  
+    out << SectionHeader("xGrid", BLOB)<<std::endl;
+    PrintBlob(out, "xGrid");
+
+    out << SectionHeader("FastKernel", BLOB)<<std::endl;
+  }
+
+  inline void FKHeader::AddTag( section sec, std::string const& key, std::string const& value)
+  { 
+    keyMap *tMap = GetMap(sec);
+    keyMap::const_iterator iMap = (*tMap).find(key);
+      
+    if (iMap != (*tMap).end())
+      throw FileError("FKHeader::AddTag","key clash: " + key);
+
+    // trim trailing characters
+    const size_t trimpos = std::min(value.size(), value.find_last_not_of(" \t\n\r")+1);
+    (*tMap).insert(std::pair<std::string,std::string>(key,value.substr(0, trimpos)));
+  }
+
+  inline bool FKHeader::HasTag( section sec, std::string const& key) const
+  {
+    const keyMap *tMap = GetMap(sec);
+    keyMap::const_iterator iMap = (*tMap).find(key);
+
+    if (iMap != (*tMap).end())
+      return true;
+    return false;
+  }
+
+  inline std::string FKHeader::GetTag( section sec, std::string const& key) const
+  { 
+      const keyMap *tMap = GetMap(sec);
+      keyMap::const_iterator iMap = (*tMap).find(key);
+      
+      if (iMap != (*tMap).end())
+          return (*iMap).second;
+      else
+          throw FileError("FKHeader::GetTag","key " + key + " not found in header!");
+
+      return std::string();
+  }
+
+  inline FKHeader::section FKHeader::GetSection(std::string const& title)
+  {
+    if (title.compare("VersionInfo") == 0) return FKHeader::VERSIONS;
+    if (title.compare("GridInfo") == 0) return FKHeader::GRIDINFO;
+    if (title.compare("TheoryInfo") == 0) return FKHeader::THEORYINFO;
+    throw FileError("FKHeader::GetSection","Unrecognised section title: " + title);
+    return BLOB;
+  }
+
+  inline const FKHeader::keyMap* FKHeader::GetMap( section const& sec ) const
+  {
+    switch (sec)
+    {
+      case VERSIONS:       return &fVersions;
+      case GRIDINFO:      return &fGridInfo;
+      case THEORYINFO:    return &fTheoryInfo;
+      case BLOB:          return &fBlobString;
+    }
+
+    return NULL;
+  }
+
+  inline void FKHeader::RemTag( section sec, std::string const& key )
+  {
+    keyMap *tMap = GetMap(sec);
+    keyMap::iterator iTag = (*tMap).find(key);
+    if (iTag != (*tMap).end())
+      (*tMap).erase(iTag);
+    else
+      throw FileError("FKHeader::RemTag", "key " + key + " not found in header!");
+  }
+
+
+  inline void FKHeader::PrintKeyValue( std::ostream& os, section sec ) const
+  {
+    const keyMap *tMap = GetMap(sec);
+    for (keyMap::const_iterator iPair = (*tMap).begin();
+         iPair != (*tMap).end(); iPair++)
+      os << "*" << (*iPair).first <<": "<<(*iPair).second<<std::endl;
+  }
+
+  inline void FKHeader::ReadKeyValue( std::istream& is, section sec )
+  {
+    // While the next char is a key-value pair indicator
+    while ((is >> std::ws).peek() == FK_DELIN_KEY )
+    {
+      // Read Key-Value pair
+      std::string keypair; getline( is, keypair );
+      const std::string key = keypair.substr(1, keypair.find(':')-1);
+      std::string val = keypair.substr(keypair.find(':')+1, keypair.size());
+
+      // Remove leading spaces from value
+      const size_t startpos = val.find_first_not_of(' ');
+      val = val.substr(startpos, val.size());
+
+      // Add the tag
+      AddTag(sec, key, val);
+    }
+
+    return;
+
+  }
+
+  inline void FKHeader::PrintBlob(std::ostream& os, std::string blobname) const
+  {
+    keyMap::const_iterator iBlob = fBlobString.find(blobname);
+    if (iBlob != fBlobString.end())
+    { os << (*iBlob).second << std::endl; }
+    else
+      throw InitError("FKHeader::PrintBlob","Blob " + blobname + " not initialised");
+  }
+
+  inline void FKHeader::ReadBlob(std::istream& is, std::string blobname)
+  {
+     // While the next char is not a delineator
+    std::stringstream blobstream;
+    while ((is >> std::ws).peek() != FK_DELIN_SEC &&
+           (is >> std::ws).peek() != FK_DELIN_BLB )
+    {
+      std::string blobline; getline( is, blobline );
+      blobstream << blobline <<std::endl;
+    }
+
+    AddTag(BLOB, blobname, blobstream.str());
+  }
+
+  inline std::string FKHeader::SectionHeader(const char* title, section sec) const
+  {
+    std::string secdeln = sec == BLOB ? std::string("{"):std::string("_");
+    std::string sechead = secdeln + title;
+    sechead += std::string(60-sechead.size(),'_');
+    return sechead;
+  }
+
+
+ // **********************************************************************************
 
 #ifdef HAVE_SSE3
   #include <pmmintrin.h>

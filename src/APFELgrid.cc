@@ -20,16 +20,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "APFELgrid/APFELgrid.h"
-#include "APFELgrid/fkgenerator.h"
-
 #include "APFEL/APFEL.h"
+#include "APFELgrid/APFELgrid.h"
 
 #include "appl_grid/appl_grid.h"
 #include "appl_grid/appl_igrid.h"
 
 #include <math.h>
 #include <sys/time.h>
+
+namespace NNPDF{
+  // FKGenerator constructor/destructor - FKGenerator is a wrapper class that needs very little handling
+  FKGenerator::FKGenerator( std::istream& is ): FKTable(is) {};
+  FKGenerator::~FKGenerator(){}
+
+  // Fill the FKTable (hadronic data)
+  void FKGenerator::Fill(   int const& d,     // Datapoint index
+                            int const& ix1,   // First x-index
+                            int const& ix2,   // Second x-index
+                            size_t const& ifl1,  // First flavour index
+                            size_t const& ifl2,  // Second flavour index
+                            double const& fk  // FK Value
+                          )
+  {
+    if (fk==0) return;
+    if (d >= fNData) throw RangeError("FKGenerator::Fill","datapoint " + ToString(d) + "out of bounds.");
+    if (ix1 >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix1) + " out of bounds.");
+    if (ix2 >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix2) + " out of bounds.");
+    if (ifl1 >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl1) + " out of bounds.");
+    if (ifl2 >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl2) + " out of bounds.");
+    // pointer to FKTable segment
+    const size_t iSig = GetISig(d, ix1, ix2, ifl1, ifl2);
+    if (iSig == -1) throw RangeError("FKGenerator::Fill","Cannot find FK table point!");
+    // Assign FK Table
+    fSigma[iSig] += fk;
+    return;
+  };
+
+  // DIS version of Fill
+  void FKGenerator::Fill( int const& d,     // Datapoint index
+                          int const& ix,    // x-index
+                          size_t const& ifl,   // flavour index
+                          double const& fk  // FK Value
+                        )
+  {
+    if (fk==0) return;
+    if (d >= fNData) throw RangeError("FKGenerator::Fill","datapoint " + ToString(d) + " out of bounds.");
+    if (ix >= fNx) throw RangeError("FKGenerator::Fill","xpoint " + ToString(ix) + " out of bounds.");
+    if (ifl >= 14) throw RangeError("FKGenerator::Fill","flavour " + ToString(ifl) + " out of bounds.");
+    // pointer to FKTable segment
+    const size_t iSig = GetISig(d, ix, ifl);
+    if (iSig == -1) throw RangeError("FKGenerator::Fill", "Cannot find FK table point!");
+    // Assign FK Table
+    fSigma[iSig] += fk;
+    return;
+  };
+}
+
 
 namespace APFELgrid{
 
