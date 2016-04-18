@@ -17,9 +17,9 @@
 #include "APFELgrid/transform.h"
 
 typedef float ctype;
+static double* lha_pdf;
 
 extern "C" void evolvepdf_(const double& , const double& , double* );
-static double* lha_pdf;
 void fkpdf (const double& x, const double& Q, const size_t& n, ctype* pdf)
 {
   evolvepdf_(x,Q,lha_pdf);

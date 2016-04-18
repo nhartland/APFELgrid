@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <cmath>
 #include <map>
 
@@ -945,8 +946,7 @@ namespace NNPDF
     // Fetch PDF array
     T *pdf = 0;
     int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(T)*fDSz*Npdf);
-    if (err != 0)
-      throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + std::to_string(err));
+    if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + std::to_string(err));
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
