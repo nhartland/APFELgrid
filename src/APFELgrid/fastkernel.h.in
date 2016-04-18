@@ -22,6 +22,9 @@
 
 #pragma once
 
+@APFELGRID_HAVE_AVX@
+@APFELGRID_HAVE_SSE3@
+
 #include <string>
 #include <vector>
 #include <istream>
@@ -35,203 +38,263 @@
 
 namespace NNPDF
 {
+  static const bool Verbose = true;
 
-    static const bool Verbose = true;
-    template<class T> static int convoluteAlign() { return 1; };
-    template<> int convoluteAlign<float>() { return 4; }; // Doesn't hurt even without SSE
+  /**
+   * Replacement for std::tostring
+   */
+  template <typename T>
+  std::string ToString(T val)
+  {
+      std::stringstream stream;
+      stream << val;
+      return stream.str();
+  }
 
-    /**
-     * Replacement for std::tostring
-     */
-    template <typename T>
-    std::string ToString(T val)
-    {
-        std::stringstream stream;
-        stream << val;
-        return stream.str();
-    }
+  /**
+   * Split std::string into std::vector
+   */
+  template<typename T>
+  static void split(std::vector<T>& results, std::string const& input)
+  {
+      std::stringstream strstr(input);
+      std::istream_iterator<T> it(strstr);
+      std::istream_iterator<T> end;
+      results.assign(it, end);
+      return;
+  }
 
-    /**
-     * Split std::string into std::vector
-     */
-    template<typename T>
-    static void split(std::vector<T>& results, std::string const& input)
-    {
-        std::stringstream strstr(input);
-        std::istream_iterator<T> it(strstr);
-        std::istream_iterator<T> end;
-        results.assign(it, end);
-        return;
-    }
+ // Convolution and alignment targets ****************************************************************
+#if APFELGRID_HAVE_AVX == 1
+  #include <immintrin.h>
+  template<class T> static int convoluteAlign() { return 1; };
+  template<> int convoluteAlign<float>() { return 8; };
+  static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
+  {
+    __m256 acc = _mm256_setzero_ps();
 
-  // *********************************************************
-    // Section delineators for FK headers
-    static const int FK_DELIN_SEC = std::char_traits<char>::to_int_type('_');
-    static const int FK_DELIN_BLB = std::char_traits<char>::to_int_type('{');
-    static const int FK_DELIN_KEY = std::char_traits<char>::to_int_type('*');
-  // *********************************************************
+    const __m256* a = (const __m256*) x;
+    const __m256* b = (const __m256*) y;
 
-   /**
-    * \class FKHeader 
-    * \brief Class for parsing the header of FK tables
-    */
-    class FKHeader
-    {
+    for (int i=0; i<n/8; i++)
+      acc = _mm256_add_ps(acc, _mm256_mul_ps(*(a+i),*(b+i)));
+
+    const __m256 t1 = _mm256_hadd_ps(acc,acc);
+    const __m256 t2 = _mm256_hadd_ps(t1,t1);
+    const __m128 t3 = _mm256_extractf128_ps(t2,1);
+    const __m128 t4 = _mm_add_ss(_mm256_castps256_ps128(t2),t3);
+    retval = _mm_cvtss_f32(t4);        
+
+    _mm_empty();
+  }
+#elif APFELGRID_HAVE_SSE3 == 1
+  #include <pmmintrin.h>
+  template<class T> static int convoluteAlign() { return 1; };
+  template<> int convoluteAlign<float>() { return 4; };
+  static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
+  {
+    __m128 acc = _mm_setzero_ps();
+
+    const __m128* a = (const __m128*) x;
+    const __m128* b = (const __m128*) y;
+
+    for (int i=0; i<n/4; i++)
+      acc = _mm_add_ps(acc, _mm_mul_ps(*(a+i),*(b+i)));
+
+    const __m128 shuffle1 = _mm_shuffle_ps(acc, acc, _MM_SHUFFLE(1,0,3,2));
+    const __m128 tmp1     = _mm_add_ps(acc, shuffle1);
+    const __m128 shuffle2 = _mm_shuffle_ps(tmp1, tmp1, _MM_SHUFFLE(2,3,0,1));
+    const __m128 tmp2     = _mm_add_ps(tmp1, shuffle2);
+
+    _mm_store_ss(&retval,tmp2);
+    _mm_empty();
+
+    return;
+  }
+#else
+  template<class T> static int convoluteAlign() { return 1; };
+  static inline void convolute(const float* __restrict__ pdf, const float* __restrict__ sig, float& retval, int const& n)
+  {
+    for (int i = 0; i < n; i++)
+      retval += pdf[i]*sig[i];
+  }
+#endif
+
+  // Basic double-precision convolution
+  static inline void convolute(const double* __restrict__ pdf, const double* __restrict__ sig, double& retval, int const& n)
+  {
+    for (int i = 0; i < n; i++)
+      retval += pdf[i]*sig[i];
+  }
+
+ // **********************************************************************************
+
+  // Section delineators for FK headers
+  static const int FK_DELIN_SEC = std::char_traits<char>::to_int_type('_');
+  static const int FK_DELIN_BLB = std::char_traits<char>::to_int_type('{');
+  static const int FK_DELIN_KEY = std::char_traits<char>::to_int_type('*');
+
+ /**
+  * \class FKHeader 
+  * \brief Class for parsing the header of FK tables
+  */
+  class FKHeader
+  {
+  public:
+      FKHeader();   //!< Prototype constructor
+      FKHeader(std::istream&);                  //!< Construct from istream
+      FKHeader(std::string const& filename);   //!< Construct from file
+      FKHeader(FKHeader const&);               //!< Copy-construct
+      ~FKHeader();                             //!< Destructor
+
+      void Read(std::istream&);  //!< Read FKTable header from ostream
+      void Print(std::ostream&) const; //!< Print FKTable header to ostream
+
+      typedef std::map<std::string, std::string> keyMap;
+      typedef enum {VERSIONS, GRIDINFO, THEORYINFO, BLOB} section;
+
+      // ********************************* Tag Manip *********************************
+
+      template<typename T>
+      void AddTag( section sec, std::string const& key, T const& value)
+      { AddTag(sec, key,ToString(value)); }
+      void AddTag( section sec, std::string const& key, const char* value)
+      { AddTag(sec, key,ToString(value));}
+      void AddTag( section sec, std::string const& key, std::string const& value);
+
+      // ********************************* Tag Getters *********************************
+
+      bool HasTag( section sec, std::string const& key ) const; 
+      std::string GetTag( section sec, std::string const& key) const;
+      template<typename T> T GetTag( section sec, std::string const& key) const
+      { return static_cast<T>(atof(GetTag(sec,key).c_str())); }
+
+  protected:
+      // Printing helper functions
+      std::string SectionHeader(const char* title, section) const;
+
+      void PrintKeyValue(std::ostream&, section) const;
+      void ReadKeyValue( std::istream& is, section sec );
+
+      void PrintBlob(std::ostream& os, std::string blobname) const;
+      void ReadBlob(std::istream& is, std::string blobname);
+
+      // Map fetchers helper functions
+      static section GetSection(std::string const&);   //!< Fetch the appropriate section for a title
+      const keyMap* GetMap(section const& sec) const; //!< Fetch the appropriate map for a section
+      keyMap* GetMap(section const& sec)              //!< Fetch the appropriate map for a section
+      { return const_cast<keyMap*>(const_cast<const FKHeader*>(this)->GetMap(sec)); };
+
+      void RemTag( section sec, std::string const& key ); //!< Remove existing tags
+
+      // ********************************* Attributes *********************************
+
+      // Key-value pairs
+      keyMap fVersions;
+      keyMap fGridInfo;
+      keyMap fTheoryInfo;
+      keyMap fBlobString;
+  };
+
+ /**
+  * \class FKTable
+  * \brief Class for holding FastKernel tables
+  */
+  template<typename T>
+  class FKTable : public FKHeader 
+  {
     public:
-        FKHeader();   //!< Prototype constructor
-        FKHeader(std::istream&);                  //!< Construct from istream
-        FKHeader(std::string const& filename);   //!< Construct from file
-        FKHeader(FKHeader const&);               //!< Copy-construct
-        ~FKHeader();                             //!< Destructor
+      FKTable(    std::istream& , 
+                  std::vector<std::string> const& cFactors = std::vector<std::string>()
+              ); // Stream constructor
+      FKTable(    std::string const& filename,
+                  std::vector<std::string> const& cfactors = std::vector<std::string>()
+              ); //!< FK table reader
 
-        void Read(std::istream&);  //!< Read FKTable header from ostream
-        void Print(std::ostream&) const; //!< Print FKTable header to ostream
+      FKTable(FKTable const&); //!< Copy constructor
+      FKTable(FKTable const&, std::vector<int> const&); //!< Masked copy constructor
 
-        typedef std::map<std::string, std::string> keyMap;
-        typedef enum {VERSIONS, GRIDINFO, THEORYINFO, BLOB} section;
+      virtual ~FKTable(); //!< Destructor
+      void Print(std::ostream&); //!< Print FKTable header to ostream
 
-        // ********************************* Tag Manip *********************************
+      typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, T* pdf);
+      void Convolute(extern_pdf pdf, size_t const& NPDF, T* out);
 
-        template<typename T>
-        void AddTag( section sec, std::string const& key, T const& value)
-        { AddTag(sec, key,ToString(value)); }
-        void AddTag( section sec, std::string const& key, const char* value)
-        { AddTag(sec, key,ToString(value));}
-        void AddTag( section sec, std::string const& key, std::string const& value);
+      // ******************** FK Get Methods ***************************
 
-        // ********************************* Tag Getters *********************************
+      std::string const& GetDataName()  const {return fDataName;};
 
-        bool HasTag( section sec, std::string const& key ) const; 
-        std::string GetTag( section sec, std::string const& key) const;
-        template<typename T> T GetTag( section sec, std::string const& key) const
-        { return static_cast<T>(atof(GetTag(sec,key).c_str())); }
+      double const&  GetQ20()      const { return fQ20;   }
+      double const*  GetCFactors() const { return fcFactors; }
+
+      int const&   GetNData()   const { return fNData;}  //!< Return fNData
+      int const&   GetNx()      const { return fNx;   }  //!< Return fNx
+      int const&   GetTx()      const { return fTx;   }  //!< Return fTx
+      int const&   GetDSz()     const { return fDSz;  }  //!< Return fDSz
+      int const&   GetPad()     const { return fPad;  }  //!< Return fPad
+
+      double*  GetXGrid() const { return fXgrid; }  //!< Return fXGrid
+      T*       GetSigma() const { return fSigma; }  //!< Return fSigma
+
+      int*     GetFlmap()   const { return fFlmap; }          //!< Return fFlmap
+      int const&   GetNonZero() const { return fNonZero; }    //!< Return fNonZero
+      bool const&   IsHadronic()  const { return fHadronic;}  //!< Return fHadronic
 
     protected:
-        // Printing helper functions
-        std::string SectionHeader(const char* title, section) const;
+      void ReadCFactors(std::string const& filename); //!< Read C-factors from file
+      bool OptimalFlavourmap(std::string& flmap) const; //!< Determine and return the optimal flavour map
 
-        void PrintKeyValue(std::ostream&, section) const;
-        void ReadKeyValue( std::istream& is, section sec );
+      // GetISig returns a position in the FK table
+      int GetISig(  int const& d,     // Datapoint index
+                    int const& ix1,   // First x-index
+                    int const& ix2,   // Second x-index
+                    int const& ifl1,  // First flavour index
+                    int const& ifl2   // Second flavour index
+                  ) const;
 
-        void PrintBlob(std::ostream& os, std::string blobname) const;
-        void ReadBlob(std::istream& is, std::string blobname);
+      // DIS version of GetISig
+      int GetISig(  int const& d,     // Datapoint index
+                    int const& ix,    // x-index
+                    int const& ifl    // flavour index
+                 ) const;
 
-        // Map fetchers helper functions
-        static section GetSection(std::string const&);   //!< Fetch the appropriate section for a title
-        const keyMap* GetMap(section const& sec) const; //!< Fetch the appropriate map for a section
-        keyMap* GetMap(section const& sec)              //!< Fetch the appropriate map for a section
-        { return const_cast<keyMap*>(const_cast<const FKHeader*>(this)->GetMap(sec)); };
+      // Metadata
+      const std::string fDataName;
+      const std::string fDescription;
+      const int   fNData;
 
-        void RemTag( section sec, std::string const& key ); //!< Remove existing tags
+      // Process information
+      const double  fQ20;
+      const bool  fHadronic;
+      const int   fNonZero;
+      int *const  fFlmap;
 
-        // ********************************* Attributes *********************************
+      // x-grid information
+      const int   fNx;
+      const int   fTx;
+      const int   fRmr;
+      const int   fPad;
+      const int   fDSz;
 
-        // Key-value pairs
-        keyMap fVersions;
-        keyMap fGridInfo;
-        keyMap fTheoryInfo;
-        keyMap fBlobString;
-    };
+      // X-arrays        
+      double *const fXgrid;
 
-   /**
-    * \class FKTable
-    * \brief Class for holding FastKernel tables
-    */
-    template<typename T>
-    class FKTable : public FKHeader 
-    {
-      public:
-        FKTable(    std::istream& , 
-                    std::vector<std::string> const& cFactors = std::vector<std::string>()
-                ); // Stream constructor
-        FKTable(    std::string const& filename,
-                    std::vector<std::string> const& cfactors = std::vector<std::string>()
-                ); //!< FK table reader
+      // FK table
+      T *const fSigma;
 
-        FKTable(FKTable const&); //!< Copy constructor
-        FKTable(FKTable const&, std::vector<int> const&); //!< Masked copy constructor
+      // Cfactor information
+      const bool fHasCFactors;
+      double *const fcFactors;
 
-        virtual ~FKTable(); //!< Destructor
-        void Print(std::ostream&); //!< Print FKTable header to ostream
+    private:
+      FKTable();                          //!< Disable default constructor
+      FKTable& operator=(const FKTable&); //!< Disable copy-assignment
 
-        typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, T* pdf);
-        void Convolute(extern_pdf pdf, size_t const& NPDF, T* out);
+      void InitialiseFromStream(std::istream&, std::vector<std::string> const& cFactors); //!< Initialise the FK table from an input stream
+      void CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf); // Cache PDF for convolution
 
-        // ******************** FK Get Methods ***************************
-
-        std::string const& GetDataName()  const {return fDataName;};
-
-        double const&  GetQ20()      const { return fQ20;   }
-        double const*  GetCFactors() const { return fcFactors; }
-
-        int const&   GetNData()   const { return fNData;}  //!< Return fNData
-        int const&   GetNx()      const { return fNx;   }  //!< Return fNx
-        int const&   GetTx()      const { return fTx;   }  //!< Return fTx
-        int const&   GetDSz()     const { return fDSz;  }  //!< Return fDSz
-        int const&   GetPad()     const { return fPad;  }  //!< Return fPad
-
-        double*  GetXGrid() const { return fXgrid; }  //!< Return fXGrid
-        T*       GetSigma() const { return fSigma; }  //!< Return fSigma
-
-        int*     GetFlmap()   const { return fFlmap; }          //!< Return fFlmap
-        int const&   GetNonZero() const { return fNonZero; }    //!< Return fNonZero
-        bool const&   IsHadronic()  const { return fHadronic;}  //!< Return fHadronic
-
-      protected:
-        void ReadCFactors(std::string const& filename); //!< Read C-factors from file
-        bool OptimalFlavourmap(std::string& flmap) const; //!< Determine and return the optimal flavour map
-
-        // GetISig returns a position in the FK table
-        int GetISig(  int const& d,     // Datapoint index
-                      int const& ix1,   // First x-index
-                      int const& ix2,   // Second x-index
-                      int const& ifl1,  // First flavour index
-                      int const& ifl2   // Second flavour index
-                    ) const;
-
-        // DIS version of GetISig
-        int GetISig(  int const& d,     // Datapoint index
-                      int const& ix,    // x-index
-                      int const& ifl    // flavour index
-                   ) const;
-
-        // Metadata
-        const std::string fDataName;
-        const std::string fDescription;
-        const int   fNData;
-
-        // Process information
-        const double  fQ20;
-        const bool  fHadronic;
-        const int   fNonZero;
-        int *const  fFlmap;
-
-        // x-grid information
-        const int   fNx;
-        const int   fTx;
-        const int   fRmr;
-        const int   fPad;
-        const int   fDSz;
-
-        // X-arrays        
-        double *const fXgrid;
-
-        // FK table
-        T *const fSigma;
-
-        // Cfactor information
-        const bool fHasCFactors;
-        double *const fcFactors;
-
-      private:
-        FKTable();                          //!< Disable default constructor
-        FKTable& operator=(const FKTable&); //!< Disable copy-assignment
-
-        void InitialiseFromStream(std::istream&, std::vector<std::string> const& cFactors); //!< Initialise the FK table from an input stream
-        void CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf); // Cache PDF for convolution
-
-        int parseNonZero(); // Parse flavourmap information into fNonZero
-    };
+      int parseNonZero(); // Parse flavourmap information into fNonZero
+  };
 
   // ******************************** Header class ***************************************
 
@@ -460,69 +523,7 @@ namespace NNPDF
     return sechead;
   }
 
-
- // **********************************************************************************
-  #ifdef HAVE_AVX
-  #include <immintrin.h>
-  static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
-  {
-    __m256 acc = _mm256_setzero_ps();
-
-    const __m256* a = (const __m256*) x;
-    const __m256* b = (const __m256*) y;
-
-    for (int i=0; i<n/8; i++)
-      acc = _mm256_add_ps(acc, _mm256_mul_ps(*(a+i),*(b+i)));
-
-    const __m256 t1 = _mm256_hadd_ps(acc,acc);
-    const __m256 t2 = _mm256_hadd_ps(t1,t1);
-    const __m128 t3 = _mm256_extractf128_ps(t2,1);
-    const __m128 t4 = _mm_add_ss(_mm256_castps256_ps128(t2),t3);
-    retval = _mm_cvtss_f32(t4);        
-
-    _mm_empty();
-  }
-#elif defined HAVE_SSE3
-  #include <pmmintrin.h>
-
-  static inline void convolute(const float* __restrict__ x, const float* __restrict__ y, float& retval, int const& n)
-  {
-    __m128 acc = _mm_setzero_ps();
-
-    const __m128* a = (const __m128*) x;
-    const __m128* b = (const __m128*) y;
-
-    for (int i=0; i<n/4; i++)
-      acc = _mm_add_ps(acc, _mm_mul_ps(*(a+i),*(b+i)));
-
-    const __m128 shuffle1 = _mm_shuffle_ps(acc, acc, _MM_SHUFFLE(1,0,3,2));
-    const __m128 tmp1     = _mm_add_ps(acc, shuffle1);
-    const __m128 shuffle2 = _mm_shuffle_ps(tmp1, tmp1, _MM_SHUFFLE(2,3,0,1));
-    const __m128 tmp2     = _mm_add_ps(tmp1, shuffle2);
-
-    _mm_store_ss(&retval,tmp2);
-    _mm_empty();
-
-    return;
-  }
-#else
-  // Basic single-precision convolution
-  static inline void convolute(const float* __restrict__ pdf, const float* __restrict__ sig, float& retval, int const& n)
-  {
-    for (int i = 0; i < n; i++)
-      retval += pdf[i]*sig[i];
-  }
-#endif
-
-  // Basic double-precision convolution
-  static inline void convolute(const double* __restrict__ pdf, const double* __restrict__ sig, double& retval, int const& n)
-  {
-    for (int i = 0; i < n; i++)
-      retval += pdf[i]*sig[i];
-  }
-
- // **********************************************************************************
-
+// *************************************************************************************
 
   /**
    * @brief Constructor for FK Table
@@ -808,8 +809,6 @@ namespace NNPDF
       }
     }  
   }
-
-
 
   /**
    * @brief FKTable print to ostream

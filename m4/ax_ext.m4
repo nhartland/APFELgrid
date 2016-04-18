@@ -191,6 +191,7 @@ AC_DEFUN([AX_EXT],
         if test x"$ax_cv_support_sse3_ext" = x"yes"; then
           SIMD_FLAGS="$SIMD_FLAGS -msse3"
           AC_DEFINE(HAVE_SSE3,,[Support SSE3 (Streaming SIMD Extensions 3) instructions])
+          AC_SUBST(APFELGRID_HAVE_SSE3, ["#define APFELGRID_HAVE_SSE3 1"])
         else
           AC_MSG_WARN([Your processor supports sse3 instructions but not your compiler, can you try another compiler?])
         fi
@@ -231,6 +232,7 @@ AC_DEFUN([AX_EXT],
         if test x"$ax_cv_support_avx_ext" = x"yes"; then
           SIMD_FLAGS="$SIMD_FLAGS -mavx"
           AC_DEFINE(HAVE_AVX,,[Support AVX (Advanced Vector Extensions) instructions])
+          AC_SUBST(APFELGRID_HAVE_AVX, ["#define APFELGRID_HAVE_AVX 1"])
         else
           AC_MSG_WARN([Your processor supports avx instructions but not your compiler, can you try another compiler?])
         fi
