@@ -1,5 +1,7 @@
+// APFELgrid
+// =========
 // FastKernel table generation
-// ===========================
+// ---------------------------
 // Here we shall demonstrate with a working example how an **APPLgrid** may be
 // combined with evolution factors provided by **APFEL** to produce a **FastKernel**
 // (**FK**) table

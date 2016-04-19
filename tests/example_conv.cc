@@ -1,8 +1,10 @@
+// APFELgrid
+// =========
 // FastKernel table convolution
-// ============================
+// ----------------------------
 // This example demonstrates how an **FK** table may be read from file and convoluted with a given PDF.
 
-// For this demonstration, we need some boilerplate headers
+// For this demonstration, we need some standard headers
 #include <iostream>
 #include <cstdlib>
 
