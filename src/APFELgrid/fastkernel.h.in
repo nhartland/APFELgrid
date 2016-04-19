@@ -946,7 +946,7 @@ namespace NNPDF
   {
     // Fetch PDF array
     T *pdf = 0;
-    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 16, sizeof(T)*fDSz*Npdf);
+    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, sizeof(T)*fDSz*Npdf);
     if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + ToString(err));
     CachePDF(inpdf, Npdf, pdf);
 
