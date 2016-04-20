@@ -62,6 +62,11 @@
 
 % \biboptions{}
 
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\ba}{\begin{eqnarray}}
+\newcommand{\ea}{\end{eqnarray}}
+
 %% This list environment is used for the references in the
 %% Program Summary
 %%
@@ -242,11 +247,40 @@ subsequently be combined with an arbitrary PDF set. Examples of codes that have 
 
 
 
+\section{The FastKernel method}
 
-
-
-
-
+\be  \sigma_{pp\to X} = \left( \frac{\alpha_s(Q^2)}{2\pi} \right)^{p} \int dx_1\, dx_2\,  f_i(x_1,Q^2)\; d\hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2) \, . \label{eq:hadconv} \ee
+\be  \sigma_{pp\to X} = \left( \frac{\alpha_s(Q^2)}{2\pi} \right)^{p} \sum_{\alpha,\beta}^{N_X}  f_i(x_\alpha,Q^2)\; W_{\alpha\beta,ij}\; f_j(x_\beta,Q^2) \, . \label{eq:hadconv2} \ee
+\be W_{\alpha\beta,ij} =  \int dx_1\, dx_2\,  \mathcal{I}^{(\alpha)}(x_1)\; d\hat{\sigma}_{ij\to X}\; \mathcal{I}^{(\beta)}(x_2) \, . \ee
+\be
+\label{eq:applconv}
+\sigma = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x} \sum_{\tau}^{N_{Q}}
+W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}
+F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right),
+\ee
+\be F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right) =  \sum_{i,j}^{13} C^{(s)}_{ij}  \left( f_i(x_{\alpha},Q^2_\tau)f_j(x_{\beta},Q^2_\tau) \right).  \label{eq:APPLsubproc}\ee
+\be
+f_i(x_{\alpha},Q^2_\tau) = \sum_{k}^{n_f} \sum_\beta^{N_x} A^\tau_{\alpha\beta ik}\; f_k(x_\beta,Q^2_0). \label{eq:fastPDFfinal_recalled}
+\ee 
+\ba F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right) &=&  \sum_{i,j}^{13} \sum_{k,l}^{n_f}  \sum_{\delta,\gamma}^{N_x} C^{(s)}_{ij}  \left[  A^\tau_{\alpha\delta ik}\; f_k(x_\delta,Q^2_0) A^\tau_{\beta\gamma jl}\; f_l(x_\gamma,Q^2_0) \right]\;\;\; \\
+&=&   \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0), \label{eq:FK1}
+\ea
+\be \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} = \sum_{i,j}^{13} C^{(s)}_{ij} A^\tau_{\alpha\delta ik} A^\tau_{\beta\gamma jl}.\ee
+\be
+\sigma = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x^\prime} \sum_{\tau}^{N_{Q}}
+W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}
+ \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0).
+\ee
+\be
+\label{eq:FK}
+\sigma = \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} 
+\widetilde{W}_{kl\delta\gamma} \,f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0),
+\ee
+\be
+\label{eq:FKTable}
+\widetilde{W}_{kl\delta\gamma} = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x^\prime} \sum_{\tau}^{N_{Q}}
+W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}\widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} .
+\ee
 
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
