@@ -136,8 +136,8 @@ fast interfaces but implements a set of improvements aimed at
 optimizing the performance in the context of PDF fits where many
 iterations and many predictions for each iteration are usually
 required. The main novelties are the precomputation of the PDF and
-$\alpha_s$ evolution and the optimization of the numerical convolution
-between hard cross sections and PDFs. We demostrate that our techique
+$\alpha_s$ evolution and the optimisation of the numerical convolution
+between hard cross sections and PDFs. We demonstrate that our technique
 can lead to a substantial speed improvement as compared to the
 existing interfaces.
 \end{abstract}
@@ -236,22 +236,80 @@ usually of the order of a few hours or more. In order to overcome this
 limitation, the typical strategy adopted relies on the precomputation
 of the partonic hard cross sections in such a way that the numerical
 convolution with any set of PDFs can be quickly performed {\it a
-  posteriori} by means of interpolation techniques. Examples of the
-implementation of this strategy are {\tt APPLgrid}~\cite{Carli:2010rw}
-and {\tt FastNLO}~\cite{Wobisch:2011ij}. For the computation of the
-hard cross sections, these packages rely on external codes to which
-they are interfaced, more or less directly, by means of a suite of
+  posteriori} by means of interpolation techniques.
+
+Examples of the implementation of this strategy are {\tt
+  APPLgrid}~\cite{Carli:2010rw} and {\tt
+  FastNLO}~\cite{Wobisch:2011ij}. For the computation of the hard
+cross sections, these packages rely on external codes to which they
+are interfaced, more or less directly, by means of a suite of
 functions whose scope is that of filling up PDF- and
-$\alpha_s$-independent lookup tables of cross-section weights that can
-subsequently be combined with an arbitrary PDF set. Examples of codes that have been directly interfaced to
+$\alpha_s$-independent look-up tables of cross-section weights that can
+subsequently be combined with an arbitrary set of PDFs. Examples of
+codes that have been directly interfaced to {\tt APPLgrid} and/or to
+{\tt FastNLO} are {\tt MCFM}~\cite{Campbell:2010ff} and {\tt
+  NLOJet++}~\cite{Nagy:2003tz}. More recently, dedicated interfaces to
+automated general-purpose Monte Carlo (MC) event generators have been
+developed. In particular, the {\tt aMCfast} and {\tt MCgrid} codes
+have been specifically designed to extract the relevant information
+from the {\tt MadGraph5\_aMC@NLO}~\cite{Alwall:2014hca} and {\tt
+  SHERPA}~\cite{Gleisberg:2008ta} event generators, respectively, and
+fill up look-up interpolation tables in the {\tt APPLgrid} and/or {\tt
+  FastNLO} format.
 
+While these tools have proven to be extremely useful for the
+extraction of parton densities, the great amount of experimental data
+that has become available thanks to the LHC and that are or are going
+to be included into the current PDF analyses is stretching the
+capabilities of the general strategy as well as its
+implementations. In fact, presently a typical global PDF fit includes
+thousands of hadronic data points whose predictions have to be
+computed thousands of times during the minimisation process. As a
+consequence, the ``standard'' tools, $i.e.$ {\tt APPLgrid} and {\tt
+  FastNLO}, might not be fast enough to meet the needs of the modern
+PDF fitters. For this reason we believe that a high-performance tool
+tailored for PDF analyses is becoming increasingly desirable.
 
+The so-called {\tt FastKernel} method, developed in the framework of
+the NNPDF global analyses~\cite{Ball:2010de}, was conceived to address
+this problem. The basic principle of this method is the maximisation
+of the precomputation with the consequent minimisation of the amount
+of operations needed to be performed during the PDF fit. In
+particular, the {\tt FastKernel} method relies on the precomputation
+of the partonic hard cross sections and the DGLAP evolution kernels
+and their combination into a single look-up table, which we call {\tt
+  FKtable}, in such a way that the prediction for a given hadronic
+observable can be obtained by a single numerical convolution between
+the respective {\tt FKtable} and the initial scale PDFs, which are
+the quantities that are usually fitted to data.
 
-\section{The FastKernel method}
-Hadron collider observables are typically computed in QCD by a double convolution of parton densities with a hard scattering cross-section. Consider for example the calculation of a general cross section $pp\to X$ with a set of parton distribution functions $\{f\}$ up to order $N_\alpha$ in the strong coupling
-\be  \sigma_{pp\to X} = \sum_{p}^{N_\alpha}\left( \frac{\alpha_s(Q^2)}{2\pi} \right)^{p+p_{\mathrm{LO}}} \int dx_1\, dx_2\,  f_i(x_1,Q^2)\; d\hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2) \, \label{eq:hadconv} \ee
-where $p_{\mathrm{LO}}$ is the leading order power of the strong coupling for the process $pp\to X$, $Q^2$ is the hard scale of the process and the indices $i,j$ sum over the active partonic species in the calculation. The central observation of tools such as {\tt APPLgrid} and {\tt fastNLO} is that such a calculation can be expressed as a more computationally efficient product
-\be
+In this paper we present a public implementation of the {\tt
+  FastKernel} method in which the partonic hard cross sections are
+taken from any given {\tt APPLgrid} look-up table while the DGLAP
+evolution kernels are provided by {\tt APFEL}
+code~\cite{Bertone:2013vaa}. We named the resulting code {\tt
+  APFELgrid}.
+
+The outline of this paper is the following. In
+Sect.~\ref{sec:FastKernel} we present the tecnical details of the
+implemantation of the {\tt FastKernel} method.
+
+\section{The FastKernel method}\label{sec:FastKernel}
+
+Hadron collider observables are typically computed in QCD by a double
+convolution of parton densities with a hard scattering
+cross-section. Consider for example the calculation of a general cross
+section $pp\to X$ with a set of parton distribution functions $\{f\}$
+up to order $N_\alpha$ in the strong coupling \be \sigma_{pp\to X} =
+\sum_{p}^{N_\alpha}\left( \frac{\alpha_s(Q^2)}{2\pi}
+\right)^{p+p_{\mathrm{LO}}} \int dx_1\, dx_2\, f_i(x_1,Q^2)\;
+d\hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2) \, \label{eq:hadconv} \ee where
+$p_{\mathrm{LO}}$ is the leading order power of the strong coupling
+for the process $pp\to X$, $Q^2$ is the hard scale of the process and
+the indices $i,j$ sum over the active partonic species in the
+calculation. The central observation of tools such as {\tt APPLgrid}
+and {\tt FastNLO} is that such a calculation can be expressed as a
+more computationally efficient product \be
 \label{eq:applconv}
 \sigma = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x} \sum_{\tau}^{N_{Q}}
 W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}
