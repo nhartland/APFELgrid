@@ -218,6 +218,9 @@ QCD; parton distribution functions; fast predictions.
 of programs previously published in the CPC Program Library.\\
 \end{small}
 
+\clearpage
+
+\tableofcontents
 
 %% main text
 \section{Introduction}\label{sec:intro}
@@ -346,7 +349,26 @@ where the object
 W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}\widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} .
 \ee
 is referred to here as an {\tt FK} table, and combines the information stored in {\tt APPLgrid}-style interpolated weight grids with analogously interpolated DGLAP evolution kernels. Such a combination
-enables for a maximally computationally-efficient expression for the calculation of observables at hadron colliders. 
+enables for a maximally computationally-efficient expression for the calculation of observables at hadron colliders.
+
+\section{{\tt APFELgrid} manual}
+
+\section{Benchmark}
+
+In this section we discuss...
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.4]{plots/t0}
+\caption{\small Performance comparisons between {\tt APFELgrid} with
+  AVX, SSE3 and double precision convolution and {\tt APPLgrid}
+  convolution time per point and process.}
+\label{fig:benchmark}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
