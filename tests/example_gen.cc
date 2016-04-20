@@ -48,17 +48,17 @@ int main(int argc, char* argv[]) {
   APFEL::SetGridParameters(2,15,5,1e-1);
 
   // With the x-grid specified, we can now generate the **FK** table. Firstly we specify
-  // and initial scale from which the evolution is to be performed. Here we use an initial
+  // an initial scale from which the evolution is to be performed. Here we are using an initial
   // scale of *Q0 = 1 GeV*.
   const double Q0 = 1.0;
 
-  // The **FK** table is then generated with a single call to computeFK. Its arguments are
+  // The **FK** table is then generated with a single call to *computeFK*. Its arguments are
   // + *Q0*           - the requested initial scale
   // + *"ATLASZRAP"*  - the requested name of the **FK** table
   // + *g*            - the **APPLgrid** to be combined
-  // + *gridfile*     - the path to the **APPLgrid** to be combined (required to reconstruct some APPLgrid parameters)
+  // + *gridfile*     - the path to the **APPLgrid** to be combined
 
-  // *computeFK* will then return an *NNPDF::FKTable<double>*. The template parameter specifies
+  // *computeFK* will then return an *NNPDF::FKTable\<double\>*. The template parameter specifies
   // the precision of the internal representation of the FK table, along with the precision of its
   // output after convolution. For generation purposes this is fixed at double precision, however
   // the grid may be later read at single precision in order to enjoy the benefits of faster convolution.
