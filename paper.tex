@@ -232,9 +232,16 @@ limitation, the typical strategy adopted relies on the precomputation
 of the partonic hard cross sections in such a way that the numerical
 convolution with any set of PDFs can be quickly performed {\it a
   posteriori} by means of interpolation techniques. Examples of the
-implementation of such a strategy are {\tt
-  APPLgrid}~\cite{Carli:2010rw} and {\tt
-  FastNLO}~\cite{Wobisch:2011ij}.
+implementation of this strategy are {\tt APPLgrid}~\cite{Carli:2010rw}
+and {\tt FastNLO}~\cite{Wobisch:2011ij}. For the computation of the
+hard cross sections, these packages rely on external codes to which
+they are interfaced, more or less directly, by means of a suite of
+functions whose scope is that of filling up PDF- and
+$\alpha_s$-independent lookup tables of cross-section weights that can
+subsequently be combined with an arbitrary PDF set. Examples of codes that have been directly interfaced to
+
+
+
 
 
 
