@@ -42,10 +42,10 @@ namespace APFELgrid
 
   // ************************ FK table computation **************************
   // Performs the combination of an APPLgrid g with evolution factors provided
-  // by APFEL, resulting in a new FK table. Required arguments are the name of the produced table 'name', 
-  // the appl::grid g, the initial scale for the FK tables Q0, and a boolean specifying whether or not the
-  // APPLgrid has PDF weights enabled (this is at the moment impossible to tell from the APPLgrid API) 
-  NNPDF::FKTable<double>* computeFK( std::string const& name, appl::grid const& g, double const& Q0, bool const& pdfwgt );
+  // by APFEL, resulting in a new FK table. Required arguments are the initial 
+  // scale for the FK tables (Q0), the name of the produced table (name), the appl::grid (g),
+  // the path to the appl::grid (gridfile) and an optional appl::grid directory (directory).
+  NNPDF::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory = "grid" );
 }
 
 namespace NNPDF

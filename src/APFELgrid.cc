@@ -26,6 +26,9 @@
 #include "appl_grid/appl_grid.h"
 #include "appl_grid/appl_igrid.h"
 
+#include "TFile.h"
+#include "TVectorT.h"
+
 #include <math.h>
 #include <sys/time.h>
 
@@ -170,6 +173,13 @@ namespace APFELgrid{
     if (g.calculation() == appl::grid::AMCATNLO)
       return (pto==0) ? 3:0;
     return pto;
+  }
+
+  // Fetches the flag specifying whether or not a grid is weighted from the TFile
+  bool get_pdf_wgt(TFile& f, std::string const& directory,  int const& gidx, int const& d)
+  {
+    char name[128];  sprintf(name, (directory+"/weight[alpha-%d][%03d]").c_str(), gidx, d); 
+    std::string strname = name; return (*(TVectorT<double>*)f.Get((strname+"/Parameters").c_str()))(13);
   }
 
   // Returns the APPLgrid PDF object associated with the ith subgrid of g
@@ -355,11 +365,14 @@ namespace APFELgrid{
   }
 
   // Performs the combination of an APPLgrid g with evolution factors provided
-  // by APFEL, resulting in a new FK table. Required arguments are the name of the produced table 'name', 
-  // the appl::grid g, the initial scale for the FK tables Q0, and a boolean specifying whether or not the
-  // APPLgrid has PDF weights enabled (this is at the moment impossible to tell from the APPLgrid API) 
-  NNPDF::FKTable<double>* computeFK( std::string const& name, appl::grid const& g, double const& Q0, bool const& pdfwgt )
+  // by APFEL, resulting in a new FK table. Required arguments are the initial scale Q0, name of the produced table 'name', 
+  // the appl::grid g, the path to the appl::grid file itself, and an (optional) appl::grid directory. The paths are required
+  // as we have to reconstruct the _m_reweight parameter from APPLgrid.  
+  NNPDF::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory)
   {
+    // Read TFile for extraction of pdfwgt parameter
+    TFile f(gridfile.c_str());
+
     // Set APFEL scale limits
     double Qmin, Qmax;
     get_appl_Q2lims(g, Qmin, Qmax);
@@ -388,6 +401,7 @@ namespace APFELgrid{
     {
       const int gidx = get_grid_idx(g, pto);          // APPLgrid grid index
       appl::appl_pdf *genpdf = get_appl_pdf(g, gidx); // APPLgrid pdf generator
+      const bool pdfwgt = get_pdf_wgt(f, directory, gidx, d);    // APPLgrid pdf weight parameter
 
       // Define subprocess weight array W, and parton density array H
       const size_t nsubproc = g.subProcesses(gidx);

@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
   APFEL::SetMaxFlavourPDFs(5);
 
   // Next we read the **APPLgrid** through the usual procedure
-  appl::grid g("./tests/atlas-Z0-rapidity.root");
+  const std::string gridfile = "./tests/atlas-Z0-rapidity.root";
+  const appl::grid  g(gridfile);
 
   // Once the **APPLgrid** is read, we can specify the initial-scale grid of x-points
   // to be used for the interpolation of the evolution factors. To do this
@@ -51,21 +52,17 @@ int main(int argc, char* argv[]) {
   // scale of *Q0 = 1 GeV*.
   const double Q0 = 1.0;
 
-  // Next we must specify if the **APPLgrid** has the pdf weighting option enabled.
-  // It is not currently possible to judge this from **APFELgrid**, so it must be specified externally.
-  const bool pdfweight = false;
-
   // The **FK** table is then generated with a single call to computeFK. Its arguments are
+  // + *Q0*           - the requested initial scale
   // + *"ATLASZRAP"*  - the requested name of the **FK** table
   // + *g*            - the **APPLgrid** to be combined
-  // + *Q0*           - the requested initial scale
-  // + *pdfweight*    - the boolean specifying whether or not the grid is weighted.
+  // + *gridfile*     - the path to the **APPLgrid** to be combined (required to reconstruct some APPLgrid parameters)
 
   // *computeFK* will then return an *NNPDF::FKTable<double>*. The template parameter specifies
   // the precision of the internal representation of the FK table, along with the precision of its
   // output after convolution. For generation purposes this is fixed at double precision, however
-  // the grid may be later read at single precision to enjoy the benefits of faster convolution.
-  NNPDF::FKTable<double>* FK = APFELgrid::computeFK("ATLASZRAP", g, Q0, pdfweight);
+  // the grid may be later read at single precision in order to enjoy the benefits of faster convolution.
+  NNPDF::FKTable<double>* FK = APFELgrid::computeFK(Q0, "ATLASZRAP", g, gridfile);
 
   // Now the user may add various tags to the FK table as they wish, to help identify e.g
   // the theory parameters used in its generation later. For example:
