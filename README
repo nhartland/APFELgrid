@@ -1,18 +1,39 @@
-# APFELgrid
-Code and examples for the APFELgrid plugin.
+APFELgrid
+=========
+The APFELgrid plugin is a tool designed to accelerate the computation of physical observables
+at hadron colliders, by means of combining the interpolated weight-grids provided by the APPLgrid
+project with the evolution of parton densities provided by APFEL. The tool is aimed at PDF fitting groups, 
+as it allows for the extremely rapid recalculation of cross-sections when varying the input PDF. 
+
+APFELgrid generates FastKernel (or FK) tables which reduce the computation of NLO pQCD predictions 
+to a particuarly compact form in terms of PDFs at a single initial scale.
+
+<center>![FastKernel convolution](./fk_convolution.pdf)</center>
+
+These tables are used for fits in the [NNPDF](http://nnpdf.hepforge.org) series of PDF determinations.
+
+The plugin
+----------
+
+This package consists of two major parts
+
+	+	**The APFELgrid plugin** itself, which performs the combination of APPLgrid tables and APFEL evolution into FK tables.
+	+	**The FastKernel driver**, which describes the FK file format and provides basic convolution routines.
+
+The APFELgrid code is installed directly as a plugin to APFEL. Its use is demonstrated in the example *example_gen.cc*.
+
+The FastKernel driver is supplied as a single C++ header which may be dropped into users projects where convenient. Included in 
+the driver are routines for the basic and SIMD accelerated convolution with externally provided PDFs. An example of how to use the
+included driver is given in *example_conv.cc*. The FK table format itselfis a simple plaintext format designed such that writing 
+custom interfaces to it should be simple. 
 
 Requirements
 ------------
-**APFEL** master
-(github.com/scarrazza/apfel)
+	+	**APFEL** 		[master](http://github.com/scarrazza/apfel)
+	+	**LHAPDF** 		[6.X.X](http://lhapdf.hepforge.org)
+	+	**APPLgrid** 	[1.4.70](http://applgrid.hepforge.org)
 
-**LHAPDF** 6.X.X
-(lhapdf.hepforge.org)
-
-**APPLgrid** 1.4.70 
-(applgrid.hepforge.org)
-
-This must be modified such that all headers are installed
+Your APPLgrid installation must be modified such that all headers are installed
 (simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)
 
 Installation and tests
@@ -22,19 +43,19 @@ detects the path of APFEL and configures and compiles the package for installati
 
 To use this script and install to the default directory type
 
-	./setup.sh
-	make install
+    ./setup.sh
+    make install
 
 Alternatively, the APPLgrid headers may be installed manually as specified above, and the
 installation performed in the typical autotools fashion
 
-	(autoreconf -i)
-	./configure
-	make
-	make install
+    (autoreconf -i)
+    ./configure
+    make
+    make install
 
 A few tests can be performed upon the package with
 
-	make check
+    make check
 
-this is automatically executed by the boostrap script.
+which is automatically executed by the boostrap script.
