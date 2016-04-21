@@ -17,8 +17,8 @@ The plugin
 
 This package consists of two major parts
 
-	+	**The APFELgrid plugin** itself, which performs the combination of APPLgrid tables and APFEL evolution into FK tables.
-	+	**The FastKernel driver**, which describes the FK file format and provides basic convolution routines.
++	**The APFELgrid plugin** itself, which performs the combination of APPLgrid tables and APFEL evolution into FK tables.
++	**The FastKernel driver**, which describes the FK file format and provides basic convolution routines.
 
 The APFELgrid code is installed directly as a plugin to APFEL. Its use is demonstrated in the example *example_gen.cc*.
 
@@ -29,9 +29,9 @@ custom interfaces to it should be simple.
 
 Requirements
 ------------
-	+	**APFEL** 		[master](http://github.com/scarrazza/apfel)
-	+	**LHAPDF** 		[6.X.X](http://lhapdf.hepforge.org)
-	+	**APPLgrid** 	[1.4.70](http://applgrid.hepforge.org)
++	**APFEL** 		[master](http://github.com/scarrazza/apfel)
++	**LHAPDF** 		[6.X.X](http://lhapdf.hepforge.org)
++	**APPLgrid** 	[1.4.70](http://applgrid.hepforge.org)
 
 Your APPLgrid installation must be modified such that all headers are installed
 (simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)
@@ -59,3 +59,5 @@ A few tests can be performed upon the package with
     make check
 
 which is automatically executed by the boostrap script.
+
+
