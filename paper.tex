@@ -300,56 +300,170 @@ implemantation of the {\tt FastKernel} method.
 \section{The FastKernel method}\label{sec:FastKernel}
 
 Hadron collider observables are typically computed in QCD by a double
-convolution of parton densities with a hard scattering
-cross-section. Consider for example the calculation of a general cross
-section $pp\to X$ with a set of parton distribution functions $\{f\}$
-up to order $N_\alpha$ in the strong coupling \be \sigma_{pp\to X} =
-\sum_{p}^{N_\alpha}\left( \frac{\alpha_s(Q^2)}{2\pi}
-\right)^{p+p_{\mathrm{LO}}} \int dx_1\, dx_2\, f_i(x_1,Q^2)\;
-d\hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2) \, \label{eq:hadconv} \ee where
-$p_{\mathrm{LO}}$ is the leading order power of the strong coupling
-for the process $pp\to X$, $Q^2$ is the hard scale of the process and
-the indices $i,j$ sum over the active partonic species in the
-calculation. The central observation of tools such as {\tt APPLgrid}
-and {\tt FastNLO} is that such a calculation can be expressed as a
-more computationally efficient product \be
-\label{eq:applconv}
-\sigma = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x} \sum_{\tau}^{N_{Q}}
-W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}
-F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right),
-\ee
-in terms of a precomputed set of coefficients $W$ obtained by convolving the hard scattering cross-section with a set of interpolating functions in the scale of the process and the parton-$x$ of each incoming parton. In Eqn. \ref{eq:applconv} the indices $\alpha, \beta$ run over points in the $x$-space interpolation grid, $\tau$ runs over the factorisation/renormalisation scale and $s$ runs over the (process-specific) parton subprocess densities defined as
-\be F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right) =  \sum_{i,j}^{13} C^{(s)}_{ij}  \left( f_i(x_{\alpha},Q^2_\tau)f_j(x_{\beta},Q^2_\tau) \right).  \label{eq:APPLsubproc}\ee
-Additionally a number of tools (e.g {\tt APFEL}, {\tt HOPPET}) are available which perform PDF evolution via an analogous procedure. PDFs at some scale $Q^2_\tau$ evaluated upon an interpolation grid can be calculated from a set of PDFs at some initial scale $Q^2_0$ as
-\be
-f_i(x_{\alpha},Q^2_\tau) = \sum_{k}^{n_f} \sum_\beta^{N_x} A^\tau_{\alpha\beta ik}\; f_k(x_\beta,Q^2_0). \label{eq:fastPDFfinal_recalled}
-\ee 
-where the table $A$ interpolates DGLAP evolution kernels upon an interpolation grid in $x$. Given these interpolated coefficients, we may replace the (general-scale) PDFs used in the subprocess parton density Eqn. \ref{eq:APPLsubproc} with their equivalent expressions c.f Eqn. \ref{eq:fastPDFfinal_recalled} like so
-\ba F^{(s)}\left(x_{\alpha}, x_{\beta},  Q^2_{\tau}\right) &=&  \sum_{i,j}^{13} \sum_{k,l}^{n_f}  \sum_{\delta,\gamma}^{N_x} C^{(s)}_{ij}  \left[  A^\tau_{\alpha\delta ik}\; f_k(x_\delta,Q^2_0) A^\tau_{\beta\gamma jl}\; f_l(x_\gamma,Q^2_0) \right]\;\;\; \\
-&=&   \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0), \label{eq:FK1}
-\ea
-where the object
-\be \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} = \sum_{i,j}^{13} C^{(s)}_{ij} A^\tau_{\alpha\delta ik} A^\tau_{\beta\gamma jl}.\ee
-combines the operations of subprocess density construction and PDF evolution. Going further it is possible to then use the expression for subprocess parton densities in Eqn.~\ref{eq:FK1} in the full cross-section calculation:
-\be
-\sigma = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x^\prime} \sum_{\tau}^{N_{Q}}
-W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}
- \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0).
-\ee
-Performing some further contractions it is possible to obtain an extremely compact expression for the calculation of the cross-section in question, in terms of only the initial-scale PDFs and summing only over the initial scale interpolating $x$-grid and incoming parton flavors.
-\be
-\label{eq:FK}
-\sigma = \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x} 
-\widetilde{W}_{kl\delta\gamma} \,f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0),
-\ee
-where the object
-\be
-\label{eq:FKTable}
-\widetilde{W}_{kl\delta\gamma} = \sum_p \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}^{N_x^\prime} \sum_{\tau}^{N_{Q}}
-W_{\alpha\beta\tau}^{(p)(s)} \, \left( \frac{\alpha_s\left(Q^2_{\tau}\right)}{2\pi}\right)^{p}\widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} .
-\ee
-is referred to here as an {\tt FK} table, and combines the information stored in {\tt APPLgrid}-style interpolated weight grids with analogously interpolated DGLAP evolution kernels. Such a combination
-enables for a maximally computationally-efficient expression for the calculation of observables at hadron colliders.
+convolution of parton densities with a hard-scattering cross
+section. Consider for example the calculation of a general cross
+section $pp\to X$ with a set of PDFs $\{f\}$:
+\begin{equation} \label{eq:hadconv}
+  \sigma_{pp\to X} =
+  \sum_{i,j}\int dx_1\, dx_2\, f_i(x_1,Q^2)\;
+  \hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2)\,,
+\end{equation}
+where $Q^2$ is the typical hard scale of the process and the indices
+$i,j$ sum over the active partonic species in the calculation. The
+partonic cross section $\hat{\sigma}_{ij\to X}$ admits the
+perturbative expansion:
+\begin{equation}\label{eq:expansion}
+\hat{\sigma}_{ij\to X} = \alpha_s^{p_{\rm LO}}(Q^2) \sum_{p=0}^{N_\alpha} \alpha_s^{p}(Q^2)\hat{\sigma}^{(p)}_{ij\to X}
+\end{equation}
+$p_{\rm LO}$ being the $\alpha_s$ power of the leading-order
+contribution and $\hat{\sigma}^{(p)}_{ij\to X}$ the N$^p$LO
+contribution. Plugging Eq.~(\ref{eq:expansion}) into
+Eq.~(\ref{eq:hadconv}), one gets:
+\begin{equation}\label{eq:pertexp}
+  \sigma_{pp\to X} =
+  \sum_{i,j}\sum_{p=0}^{N_\alpha} \int dx_1\,dx_2\,
+  \hat{\sigma}^{(p)}_{ij\to X}\,\alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)\,.
+\end{equation}
+
+The central observation of tools such as {\tt APPLgrid} and {\tt
+  FastNLO} is that the part of the calculation depending on $\alpha_s$
+and PDFs can be computed by means of interpolation techniquies
+starting from the knowledge of these quantities for a finite number of
+values of $x_1$, $x_2$, and $Q^2$. In particular, one can use the
+interpolation formula:
+\begin{equation}\label{eq:interpolation}
+\begin{array}{c}
+\displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)
+  =\\
+\\
+\displaystyle \sum_{\alpha,\beta,\tau} \alpha_s^{p+p_{\rm LO}}(Q_\tau^2)
+  \,f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)
+  \,\mathcal{I}_\tau^{(n')}(Q^2)\,\mathcal{I}_\alpha^{(n_1)}(x_1)
+  \,\mathcal{I}_\beta^{(n_2)}(x_2)
+\end{array}
+\end{equation}
+where $\mathcal{I}_\tau^{(n')}(Q^2)$,
+$\mathcal{I}_\alpha^{(n_1)}(x_1)$, $\mathcal{I}_\beta^{(n_2)}(x_2)$
+are interpolating functions of degree $n'$, $n_1$, and $n_2$
+(typically Lagrange polynomials) over three independent interpolation
+grids in $Q^2$, $x_1$, and $x_2$. Plugging
+Eq.~(\ref{eq:interpolation}) into Eq.~(\ref{eq:pertexp}), one finds:
+\begin{equation}\label{eq:XsecPDFs}
+\begin{array}{rcl}
+  \displaystyle \sigma_{pp\to X} &=& \displaystyle 
+                                     \sum_{i,j}\sum_{p=0}^{N_\alpha} \sum_{\alpha,\beta,\tau} \alpha_s^{p+p_{\rm LO}}(Q_\tau^2)
+                                     \,f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)\\
+  \\
+                                 &\times& \displaystyle \mathcal{I}_\tau^{(n')}(Q^2)\int dx_1\,dx_2\,
+                                          \hat{\sigma}^{(p)}_{ij\to X}\,\mathcal{I}_\alpha^{(n_1)}(x_1)
+                                          \,\mathcal{I}_\beta^{(n_2)}(x_2)\,.
+\end{array}
+\end{equation}
+
+In addition, usually not all possible pairs $(i,j)$ in
+Eq.~(\ref{eq:hadconv}) contribute to the hadronic cross section and
+only a limited number of partonic subprocesses and thus one do the
+following replacement:
+\begin{equation}
+\sum_{i,j} \hat{\sigma}^{(p)}_{ij\to X}
+f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)\rightarrow
+\sum_{s}^{N_{\rm sub}} \hat{\sigma}^{(p)(s)} F^{(s)}_{\alpha\beta,\tau}
+\end{equation}
+where the $s$ index runs over the $N_{\rm sub}$ (process-specific)
+parton subprocess:
+\begin{equation}\label{eq:APPLsubproc}
+  F^{(s)}_{\alpha\beta,\tau} =\sum_{i,j} C^{(s)}_{ij} 
+  f_i(x_{\alpha},Q^2_\tau)f_j(x_{\beta},Q^2_\tau)\,,
+\end{equation}
+where the $C^{(s)}_{ij}$ matrix encodes the combination of PDFs that
+contribute to the $s$-th subprocess and $\hat{\sigma}^{(p)(s)}$
+is the corresponding hard cross section. Finally, defining:
+\begin{equation}
+  W_{\alpha\beta,\tau}^{(p)(s)} = \mathcal{I}_\tau^{(n')}(Q^2)\int dx_1\,dx_2\,
+  \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha^{(n_1)}(x_1)
+  \,\mathcal{I}_\beta^{(n_2)}(x_2)\,,
+\end{equation}
+one can write Eq.~(\ref{eq:XsecPDFs}) as follows:
+\begin{equation} \label{eq:applconv}
+  \sigma_{pp\to X} = \sum_p^{N_\alpha} \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta,\tau} 
+  \alpha_s^{p+p_{\rm LO}}(Q^2_\tau)W_{\alpha\beta,\tau}^{(p)(s)} \, F_{\alpha\beta,\tau}^{(s)}\,.
+\end{equation}
+
+Additionally, a number of tools, $e.g.$ {\tt
+  APFEL}~\cite{Bertone:2013vaa} or {\tt HOPPET}~\cite{Salam:2008qg},
+are available which perform PDF evolution via an analogous
+procedure. {\tt APFEL} in particular, is able to provide the so-called
+\textit{evolution operator}. The evolution operator, is computed
+assuming that the DGLAP evolution can be encoded in a single operator
+whose action on the intial scale PDFs proceduces the final scale
+PDFs. Taking $Q_0$ as an initial scale and $Q_\tau$ as a final scale,
+on the $x$-space grid one can write:
+\begin{equation}\label{eq:fastPDFfinal_recalled}
+  f_i(x_{\alpha},Q^2_\tau) = \sum_{k}
+  \sum_\beta A^\tau_{\alpha\beta, ik}\;
+  f_k(x_\beta,Q^2_0)\,, 
+\end{equation}
+where the operator $A$ is the solution of the DGLAP evolution
+equation with baundary condition:
+\begin{equation}
+A^\tau_{\alpha\beta, ik} =
+\delta_{\alpha\beta}\delta_{ik}\qquad\mbox{for}\qquad Q_\tau = Q_0\,.
+\end{equation}
+
+Given the evolution operator, we may replace the (general-scale) PDFs
+used in the subprocess parton density Eq.~(\ref{eq:APPLsubproc}) with
+their equivalent expressions c.f Eq.~(\ref{eq:fastPDFfinal_recalled})
+like so:
+\begin{equation}\label{eq:FK1}
+\begin{array}{rcl}
+F^{(s)}_{\alpha\beta,\tau} &=&  \displaystyle \sum_{i,j} \sum_{k,l}
+                               \sum_{\delta,\gamma} C^{(s)}_{ij}
+                               \left[  A^\tau_{\alpha\delta ik}\;
+                               f_k(x_\delta,Q^2_0) A^\tau_{\beta\gamma
+                               jl}\; f_l(x_\gamma,Q^2_0) \right]\;\;\;
+  \\
+\\
+&=& \displaystyle \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x}
+\widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
+f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0)\,,
+\end{array}
+\end{equation}
+where the object:
+\begin{equation}
+  \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} =
+  \sum_{i,j} C^{(s)}_{ij} A^\tau_{\alpha\delta ik}
+  A^\tau_{\beta\gamma jl}
+\end{equation}
+combines the operations of subprocess density construction and PDF
+evolution. Going further it is possible to then use the expression for
+subprocess parton densities in Eq.~(\ref{eq:FK1}) in the full
+cross-section calculation:
+\begin{equation}
+\sigma_{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma}\sum_p^{N_\alpha}
+\sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}
+\sum_{\tau} 
+\alpha_s^{p+p_{\rm LO}}(Q^2_\tau)W_{\alpha\beta,\tau}^{(p)(s)} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
+f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0)\,.
+\end{equation}
+Performing some further contractions it is possible to obtain an
+extremely compact expression for the calculation of the cross section
+in question, in terms of only the initial-scale PDFs and summing only
+over the initial scale interpolating $x$-grid and the incoming parton
+flavors:
+\begin{equation}\label{eq:FK}
+  \sigma _{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma} 
+  \widetilde{W}_{kl,\delta\gamma} \,f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0),
+\end{equation}
+where the object:
+\begin{equation}\label{eq:FKTable}
+  \widetilde{W}_{kl,\delta\gamma} = \sum_p^{N_\alpha} \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta} \sum_{\tau}
+\alpha_s^{p+p_{\rm LO}}(Q^2_\tau)  W_{\alpha\beta,\tau}^{(p)(s)} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
+\end{equation}
+is referred to here as an {\tt FKtable}, and combines the information
+stored in {\tt APPLgrid}-style interpolated weight grids with
+analogously interpolated DGLAP evolution operators. Such a combination
+enables for a maximally computationally-efficient expression for the
+calculation of observables at hadron colliders.
 
 \section{{\tt APFELgrid} manual}
 
