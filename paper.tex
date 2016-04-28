@@ -129,17 +129,27 @@
 \address[b]{TH Unit, CERN, CH-1211 Geneva 23, Switzerland}
 
 \begin{abstract}
-We present a new method conceived to ease the inclusion of hadronic
-observables into parton distribution function (PDF) fits. Our
-technique relies on the the same principles adopted by the existing
-fast interfaces but implements a set of improvements aimed at
-optimizing the performance in the context of PDF fits where many
-iterations and many predictions for each iteration are usually
-required. The main novelties are the precomputation of the PDF and
-$\alpha_s$ evolution and the optimisation of the numerical convolution
-between hard cross sections and PDFs. We demonstrate that our technique
+We present a new software package designed to aid the inclusion of hadronic
+observables into Parton Distribution Function (PDF) fits. The {\tt APFELgrid} package
+converts interpolated weight tables provided by {\tt APPLgrid} files into a more efficient
+format for PDF fitting by the pre-computation and combination with PDF and $\alpha_s$ evolution factors provided
+by {\tt APFEL}. This combination significantly reduces the number of operations required to perform the calculation
+of hadronic observables in PDF fits and simplifies the structure of the calculation into
+a readily optimised scalar product. We demonstrate that our technique
 can lead to a substantial speed improvement as compared to the
-existing interfaces.
+existing interfaces without any reduction in numerical accuracy.
+
+%We present a new method conceived to ease the inclusion of hadronic
+%observables into parton distribution function (PDF) fits. Our
+%technique relies on the the same principles adopted by the existing
+%fast interfaces but implements a set of improvements aimed at
+%optimizing the performance in the context of PDF fits where many
+%iterations and many predictions for each iteration are usually
+%required. The main novelties are the precomputation of the PDF and
+%$\alpha_s$ evolution and the optimisation of the numerical convolution
+%between hard cross sections and PDFs. We demonstrate that our technique
+%can lead to a substantial speed improvement as compared to the
+%existing interfaces.
 \end{abstract}
 
 \begin{keyword}
@@ -160,138 +170,88 @@ QCD; parton distribution functions; fast predictions.
   %Leave blank, supplied by Elsevier.
 {\em Catalogue identifier:}                                   \\
   %Leave blank, supplied by Elsevier.
-{\em Licensing provisions:}                                   \\
-  %enter "none" if CPC non-profit use license is sufficient.
-{\em Programming language:}                                   \\
-{\em Computer:}                                               \\
+{\em Licensing provisions:}   MIT license                                \\
+{\em Programming language:}  C++                                 \\
+{\em Computer:} PC/Mac                                               \\
   %Computer(s) for which program has been designed.
-{\em Operating system:}                                       \\
+{\em Operating system:} MacOS/Linux                                       \\
   %Operating system(s) for which program has been designed.
-{\em RAM:} bytes                                              \\
+{\em RAM:} varying                                              \\
   %RAM in bytes required to execute program with typical data.
-{\em Number of processors used:}                              \\
-  %If more than one processor.
-{\em Supplementary material:}                                 \\
-  % Fill in if necessary, otherwise leave out.
-{\em Keywords:} Keyword one, Keyword two, Keyword three, etc.  \\
+{\em Keywords:} QCD, PDF\\
   % Please give some freely chosen keywords that we can use in a
   % cumulative keyword index.
-{\em Classification:}                                         \\
+{\em Classification:}  11.1 General, High Energy Physics and Computing                                       \\
   %Classify using CPC Program Library Subject Index, see (
   % http://cpc.cs.qub.ac.uk/subjectIndex/SUBJECT_index.html)
   %e.g. 4.4 Feynman diagrams, 5 Computer Algebra.
-{\em External routines/libraries:}                            \\
+{\em External routines/libraries:}  {\tt APPLgrid}, {\tt APFEL}                          \\
   % Fill in if necessary, otherwise leave out.
-{\em Subprograms used:}                                       \\
-  %Fill in if necessary, otherwise leave out.
-{\em Catalogue identifier of previous version:}*              \\
-  %Only required for a New Version summary, otherwise leave out.
-{\em Journal reference of previous version:}*                  \\
-  %Only required for a New Version summary, otherwise leave out.
-{\em Does the new version supersede the previous version?:}*   \\
-  %Only required for a New Version summary, otherwise leave out.
 {\em Nature of problem:}\\
-  %Describe the nature of the problem here.
+ Fast computation of hadronic observables under the variation of parton distribution functions.
    \\
 {\em Solution method:}\\
-  %Describe the method solution here.
+  Combination of interpolated weight grids from {\tt APPLgrid} and evolution factors from {\tt APFEL} into efficient {\tt FastKernel} tables.\\
+{\em Running time:} varying\\
    \\
-{\em Reasons for the new version:}*\\
-  %Only required for a New Version summary, otherwise leave out.
-   \\
-{\em Summary of revisions:}*\\
-  %Only required for a New Version summary, otherwise leave out.
-   \\
-{\em Restrictions:}\\
-  %Describe any restrictions on the complexity of the problem here.
-   \\
-{\em Unusual features:}\\
-  %Describe any unusual features of the program/problem here.
-   \\
-{\em Additional comments:}\\
-  %Provide any additional comments here.
-   \\
-{\em Running time:}\\
-  %Give an indication of the typical running time here.
-   \\
-* Items marked with an asterisk are only required for new versions
-of programs previously published in the CPC Program Library.\\
 \end{small}
 
 \clearpage
 
-\tableofcontents
+%%\tableofcontents
 
 %% main text
 \section{Introduction}\label{sec:intro}
 
-The need for fast and accurate cross-section predictions in the Large
-Hadron Collider (LHC) era is becoming increasingly important. In fact,
-the outstanding amount of precise data produced by the LHC experiments
-is bound to provide a very stringent constraint on the proton parton
-distribution functions (PDFs) on the condition that as many
-measurements as possible are included in PDF fits with the highest
-accuracy possible. However, the direct use of most of the codes that
-provide predictions for non-inclusive hadron-collider observables in a
-PDF fit, which typically requires a large number of iterations, is not
-viable because the time required to obtain accurate predictions is
-usually of the order of a few hours or more. In order to overcome this
-limitation, the typical strategy adopted relies on the precomputation
-of the partonic hard cross sections in such a way that the numerical
-convolution with any set of PDFs can be quickly performed {\it a
-  posteriori} by means of interpolation techniques.
+The ability to perform fast and accurate cross-section predictions for measurements at
+the Large Hadron Collider (LHC) is a vital requirement for the most precise PDF determinations. LHC measurements have a unique
+capacity to shed light upon the dynamics of the proton and provide stringent constraints upon 
+the proton PDF. In order to make full use of current and future LHC data, efficient strategies
+for the computation of predictions for these observables must be deployed. Software packages performing predictions 
+for non-inclusive hadron-collider observables cannot be easily deployed in a PDF fit requiring rapid iteration due the time required to obtain accurate results (usually of the order of a few hours or more
+per data point). In order to overcome this limitation, the typical strategy adopted for fast cross-section prediction relies on the precomputation
+of the partonic hard cross sections in such a way that the numerical convolution with any set of PDFs can be quickly performed by means of interpolation techniques.
 
-Examples of the implementation of this strategy are {\tt
+This interpolation strategy is implemented in the {\tt
   APPLgrid}~\cite{Carli:2010rw} and {\tt
-  FastNLO}~\cite{Wobisch:2011ij}. For the computation of the hard
+  FastNLO}~\cite{Wobisch:2011ij} projects. For the computation of the hard
 cross sections, these packages rely on external codes to which they
-are interfaced, more or less directly, by means of a suite of
-functions whose scope is that of filling up PDF- and
-$\alpha_s$-independent look-up tables of cross-section weights that can
-subsequently be combined with an arbitrary set of PDFs. Examples of
-codes that have been directly interfaced to {\tt APPLgrid} and/or to
-{\tt FastNLO} are {\tt MCFM}~\cite{Campbell:2010ff} and {\tt
-  NLOJet++}~\cite{Nagy:2003tz}. More recently, dedicated interfaces to
+are interfaced by means of a suite of
+functions allowing for the filling of PDF- and
+$\alpha_s$-independent look-up tables of cross-section weights. Codes
+such as {\tt MCFM}~\cite{Campbell:2010ff} and {\tt NLOJet++}~\cite{Nagy:2003tz} have been interfaced directly to 
+ {\tt APPLgrid}/{\tt FastNLO} and more recently dedicated interfaces to
 automated general-purpose Monte Carlo (MC) event generators have been
-developed. In particular, the {\tt aMCfast} and {\tt MCgrid} codes
+developed. The {\tt aMCfast} and {\tt MCgrid} codes
 have been specifically designed to extract the relevant information
 from the {\tt MadGraph5\_aMC@NLO}~\cite{Alwall:2014hca} and {\tt
-  SHERPA}~\cite{Gleisberg:2008ta} event generators, respectively, and
-fill up look-up interpolation tables in the {\tt APPLgrid} and/or {\tt
-  FastNLO} format.
+  SHERPA}~\cite{Gleisberg:2008ta} event generators respectively.
 
-While these tools have proven to be extremely useful for the
-extraction of parton densities, the great amount of experimental data
-that has become available thanks to the LHC and that are or are going
-to be included into the current PDF analyses is stretching the
-capabilities of the general strategy as well as its
-implementations. In fact, presently a typical global PDF fit includes
-thousands of hadronic data points whose predictions have to be
+While these tools have proven to be extremely useful in the
+extraction of parton densities, the volume of experimental data
+made available by LHC collaborations for use in PDF fits is already
+stretching the capabilities of typical fitting technology. Presently a typical global PDF fit includes
+thousands of hadronic data points for which predictions have to be
 computed thousands of times during the minimisation process. As a
-consequence, the ``standard'' tools, $i.e.$ {\tt APPLgrid} and {\tt
-  FastNLO}, might not be fast enough to meet the needs of the modern
-PDF fitters. For this reason we believe that a high-performance tool
-tailored for PDF analyses is becoming increasingly desirable.
+consequence the ``standard'' tools, $i.e.$ {\tt APPLgrid} and {\tt
+  FastNLO}, might not be fast enough to meet the needs of modern
+PDF fitters. For this reason a high-performance tool tailored specifically 
+for PDF analyses is becoming increasingly important.
 
-The so-called {\tt FastKernel} method, developed in the framework of
-the NNPDF global analyses~\cite{Ball:2010de}, was conceived to address
-this problem. The basic principle of this method is the maximisation
-of the precomputation with the consequent minimisation of the amount
-of operations needed to be performed during the PDF fit. In
-particular, the {\tt FastKernel} method relies on the precomputation
-of the partonic hard cross sections and the DGLAP evolution kernels
-and their combination into a single look-up table, which we call {\tt
-  FKtable}, in such a way that the prediction for a given hadronic
-observable can be obtained by a single numerical convolution between
-the respective {\tt FKtable} and the initial scale PDFs, which are
-the quantities that are usually fitted to data.
+The {\tt FastKernel} method, developed in the framework of
+the NNPDF global analyses~\cite{Ball:2010de}, was developed to address
+this problem. This method differs from the standard procedure \`{a} la {\tt APPLgrid} or {\tt fastNLO} in that it
+maximises the amount of information that is precomputed prior to fitting such as to minimise the amount
+of operations to be performed during the fit. Specifically, the {\tt FastKernel} method relies on the precomputation
+of the partonic hard cross sections and DGLAP evolution kernels
+and their combination into a single look-up table, here called a {\tt FastKernel} ({\tt FK}) table, in such a way that the prediction for a given hadronic
+observable can be obtained by a simple matrix product between
+the respective {\tt FK} table and the initial scale PDFs.
 
-In this paper we present a public implementation of the {\tt
-  FastKernel} method in which the partonic hard cross sections are
-taken from any given {\tt APPLgrid} look-up table while the DGLAP
-evolution kernels are provided by the {\tt APFEL}
-code~\cite{Bertone:2013vaa}. We named the resulting code {\tt
-  APFELgrid}.
+In this paper we present the {\tt APFELgrid} package, a public implementation of the {\tt
+  FastKernel} method in which the hard partonic cross sections provided in an {\tt APPLgrid} look-up table are combined with the DGLAP
+evolution kernels provided by the {\tt APFEL}
+package~\cite{Bertone:2013vaa}.
 
 The outline of this paper is the following. In
 Sect.~\ref{sec:FastKernel} we present the tecnical details of the
