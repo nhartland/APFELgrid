@@ -265,32 +265,29 @@ section. Consider for example the calculation of a general cross
 section $pp\to X$ with a set of PDFs $\{f\}$:
 \begin{equation} \label{eq:hadconv}
   \sigma_{pp\to X} =
-  \sum_{i,j}\int dx_1\, dx_2\, f_i(x_1,Q^2)\;
+  \sum_{i,j}^{N_F}\int dx_1\, dx_2\, f_i(x_1,Q^2)\;
   \hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2)\,,
 \end{equation}
 where $Q^2$ is the typical hard scale of the process and the indices
 $i,j$ sum over the active partonic species in the calculation. The
 partonic cross section $\hat{\sigma}_{ij\to X}$ admits the
-perturbative expansion:
+perturbative expansion
 \begin{equation}\label{eq:expansion}
 \hat{\sigma}_{ij\to X} = \alpha_s^{p_{\rm LO}}(Q^2) \sum_{p=0}^{N_\alpha} \alpha_s^{p}(Q^2)\hat{\sigma}^{(p)}_{ij\to X}
 \end{equation}
 $p_{\rm LO}$ being the $\alpha_s$ power of the leading-order
 contribution and $\hat{\sigma}^{(p)}_{ij\to X}$ the N$^p$LO
-contribution. Plugging Eq.~(\ref{eq:expansion}) into
-Eq.~(\ref{eq:hadconv}), one gets:
+contribution. Therefore to order $N_\alpha$ in QCD
 \begin{equation}\label{eq:pertexp}
   \sigma_{pp\to X} =
-  \sum_{i,j}\sum_{p=0}^{N_\alpha} \int dx_1\,dx_2\,
+  \sum_{i,j}^{N_F}\sum_{p=0}^{N_\alpha} \int dx_1\,dx_2\,
   \hat{\sigma}^{(p)}_{ij\to X}\,\alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)\,.
 \end{equation}
 
 The central observation of tools such as {\tt APPLgrid} and {\tt
-  FastNLO} is that the part of the calculation depending on $\alpha_s$
-and PDFs can be computed by means of interpolation techniquies
-starting from the knowledge of these quantities for a finite number of
-values of $x_1$, $x_2$, and $Q^2$. In particular, one can use the
-interpolation formula:
+  FastNLO} is that the PDF and $\alpha_S$ dependence may be factorised out of
+  the convolution via expansion over a set of interpolating functions in $Q^2$ and the
+  two values of parton-$x$. Explicitly, one may represent the PDFs and $\alpha_S$ as
 \begin{equation}\label{eq:interpolation}
 \begin{array}{c}
 \displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)
@@ -302,12 +299,10 @@ interpolation formula:
   \,\mathcal{I}_\beta^{(n_2)}(x_2)
 \end{array}
 \end{equation}
-where $\mathcal{I}_\tau^{(n')}(Q^2)$,
+in terms of interpolating functions $\mathcal{I}_\tau^{(n')}(Q^2)$,
 $\mathcal{I}_\alpha^{(n_1)}(x_1)$, $\mathcal{I}_\beta^{(n_2)}(x_2)$
-are interpolating functions of degree $n'$, $n_1$, and $n_2$
-(typically Lagrange polynomials) over three independent interpolation
-grids in $Q^2$, $x_1$, and $x_2$. Plugging
-Eq.~(\ref{eq:interpolation}) into Eq.~(\ref{eq:pertexp}), one finds:
+(typically Lagrange polynomials) of degree $n'$, $n_1$, and $n_2$.
+Using these expressions for the PDFs in the double-convolution of Eq.~(\ref{eq:pertexp}) one finds:
 \begin{equation}\label{eq:XsecPDFs}
 \begin{array}{rcl}
   \displaystyle \sigma_{pp\to X} &=& \displaystyle 
@@ -320,10 +315,8 @@ Eq.~(\ref{eq:interpolation}) into Eq.~(\ref{eq:pertexp}), one finds:
 \end{array}
 \end{equation}
 
-In addition, usually not all possible pairs $(i,j)$ in
-Eq.~(\ref{eq:hadconv}) contribute to the hadronic cross section and
-only a limited number of partonic subprocesses and thus one do the
-following replacement:
+Additionally one may take advantages of symmetries present in the matrix element to reduce the sum over active flavours $(i,j)$ in
+Eq.~(\ref{eq:hadconv}) to a reduced number of partonic subprocesses with a replacement such as
 \begin{equation}
 \sum_{i,j} \hat{\sigma}^{(p)}_{ij\to X}
 f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)\rightarrow
