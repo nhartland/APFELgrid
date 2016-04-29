@@ -344,7 +344,7 @@ F^{(s)}_{\alpha\beta,\tau} &=&  \displaystyle \sum_{i,j} \sum_{k,l}
                                jl}\; f_l(x_\gamma,Q^2_0) \right]\;\;\;
   \\
 \\
-&=& \displaystyle \sum_{k,l}^{n_f}\sum_{\delta,\gamma}^{N_x}
+&=& \displaystyle \sum_{k,l}\sum_{\delta,\gamma}
 \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
 f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0)\,,
 \end{array}
@@ -360,8 +360,8 @@ evolution. Going further it is possible to then use the expression for
 subprocess parton densities in Eq.~(\ref{eq:FK1}) in the full
 cross-section calculation:
 \begin{equation}
-\sigma_{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma}\sum_p^{N_\alpha}
-\sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta}
+\sigma_{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma}\sum_p
+\sum_{s} \sum_{\alpha,\beta}
 \sum_{\tau} 
 \alpha_s^{p+p_{\rm LO}}(Q^2_\tau)W_{\alpha\beta,\tau}^{(p)(s)} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
 f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0)\,.
@@ -386,9 +386,14 @@ analogously interpolated DGLAP evolution operators. Such a combination
 enables for a maximally computationally-efficient expression for the
 calculation of observables at hadron colliders.
 
+\subsection{Properties of {\tt FK} tables}
+Some discussion here of the expected performance differences. Including precomputed sums over scale, perturbative order, no need to perform PDF evolution on the fly, smaller initial scale PDF basis, simple convolution structure that can be accellerated with SIMD/OpenMP.
+Explain reduced flexibility w.r.t $\alpha_S$ variations and scales, discuss increased storage space requirement but also reduced memory footprint.
+Might want to mention possibility for generating 'fast' grids as the interpolation accuracy is decoupled.
+
 \section{Performance benchmarks}
 
-In this section we discuss...
+The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eqn.~\ref{eq:FKTable} from weight grids supplied by {\tt APPLgrid} files. In this section we shall examine the performance differences between the two expressions for cross-section prediction Eqn.~\ref{eq:applconv} ({\tt APPLgrid}) and Eqn.~\ref{eq:FK} ({\tt FK}). For a comprehensive benchmark, we shall consider a wide range of processes including LHC and Tevatron electroweak vector boson production measurements, inclusive jet data and $t\bar{t}$ total cross-sections. Predictions are provided for a wide range of kinematics, for a total of 52 source {\tt APPLgrid} files roughly corresponding to the full collider dataset of the forthcoming NNPDF3.1 PDF determination.
 
 \section{Conclusion}
 
