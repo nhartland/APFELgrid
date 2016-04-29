@@ -257,77 +257,60 @@ The outline of this paper is the following. In
 Sect.~\ref{sec:FastKernel} we present the tecnical details of the
 implemantation of the {\tt FastKernel} method.
 
-\section{The FastKernel method}\label{sec:FastKernel}
+\section{Interpolation tools for collider observables}\label{sec:FastKernel}
 
 Hadron collider observables are typically computed in QCD by a double
 convolution of parton densities with a hard scattering cross-section. Consider for example the calculation of a general cross-section $pp\to X$ with a set of PDFs $\{f\}$:
-\begin{equation}\label{eq:pertexp}
+\begin{equation}\label{eq:hadconv}
   \sigma_{pp\to X} =
-  \sum_{i,j}\sum_{p=0} \int dx_1\,dx_2\,
-  \hat{\sigma}^{(p)}_{ij\to X}\,\alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)\,.
+  \sum_{s}\sum_{p} \int dx_1\,dx_2\,
+  \hat{\sigma}^{(p)(s)}\,\alpha_s^{p+p_{\rm LO}}(Q^2) \,F^{(s)}(x_1,x_2, Q^2)\,.
 \end{equation}
-where $Q^2$ is the typical hard scale of the process, the indices
-$i,j$ sum over the active partonic species in the calculation, $p_{\rm LO}$ is the leading-order power of $\alpha_s$ for the process
-and $\hat{\sigma}^{(p)}_{ij\to X}$ the N$^p$LO contribution.
-
+where $Q^2$ is the typical hard scale of the process, the index
+$s$ sums over the active partonic subprocesses in the calculation, $p_{\rm LO}$ is the leading-order power of $\alpha_s$ for the process
+and $\hat{\sigma}^{(p)(s)}$ is the N$^p$LO cross-section for the partonic subprocess scattering $s\to X$. $F^{(s)}$ represents the 
+subprocess parton density:
+\begin{equation}\label{eq:APPLsubproc}
+  F^{(s)}(x_1,x_2, Q^2) =\sum_{i,j} C^{(s)}_{ij} 
+  f_i(x_{1},Q^2)f_j(x_{2},Q^2)\,,
+\end{equation}
+where the $C^{(s)}_{ij}$ matrix enumerates the combinations of PDFs that
+contribute to the $s$-th subprocess.
 The central observation of tools such as {\tt APPLgrid} and {\tt
   FastNLO} is that the PDF and $\alpha_S$ dependence may be factorised out of
   the convolution via expansion over a set of interpolating functions, spanning $Q^2$ and the
-  two values of parton-$x$. For example one may represent the PDFs and $\alpha_S$ as
+  two values of parton-$x$. For example one may represent the subprocess PDFs and $\alpha_S$ in terms of the Lagrange basis polynomials $\mathcal{I}_\tau(Q^2)$, $\mathcal{I}_\alpha(x_1)$ and $\mathcal{I}_\beta(x_2)$ as:
 \begin{equation}\label{eq:interpolation}
 \begin{array}{c}
-\displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)
+\displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,F^{(s)}(x_1,x_2, Q^2)
   =\\
 \\
 \displaystyle \sum_{\alpha,\beta,\tau} \alpha_s^{p+p_{\rm LO}}(Q_\tau^2)
-  \,f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)
+  \,F^{(s)}_{\alpha\beta , \tau}
   \,\mathcal{I}_\tau(Q^2)\,\mathcal{I}_\alpha(x_1)
   \,\mathcal{I}_\beta(x_2)
 \end{array}
 \end{equation}
-in terms of the Lagrange basis polynomials $\mathcal{I}_\tau(Q^2)$,
-$\mathcal{I}_\alpha(x_1)$, $\mathcal{I}_\beta(x_2)$.
-Using these expressions for the PDFs in the double-convolution of Eq.~(\ref{eq:pertexp}) one finds:
-\begin{equation}\label{eq:XsecPDFs}
-\begin{array}{rcl}
-  \displaystyle \sigma_{pp\to X} &=& \displaystyle 
-                                     \sum_{i,j}\sum_{p=0}^{N_\alpha} \sum_{\alpha,\beta,\tau} \alpha_s^{p+p_{\rm LO}}(Q_\tau^2)
-                                     \,f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)\\
-  \\
-                                 &\times& \displaystyle \mathcal{I}_\tau^{(n')}(Q^2)\int dx_1\,dx_2\,
-                                          \hat{\sigma}^{(p)}_{ij\to X}\,\mathcal{I}_\alpha^{(n_1)}(x_1)
-                                          \,\mathcal{I}_\beta^{(n_2)}(x_2)\,.
-\end{array}
-\end{equation}
+where we use the shorthand $F^{(s)}_{\alpha\beta ,\tau} = F^{(s)}(x_\alpha, x_\beta,Q_\tau^2)$.
+Using these expressions in the double-convolution of Eq.~(\ref{eq:hadconv}) one can finally obtain an expression for the desired
+cross-section which depends upon the subprocess PDFs only though a simple product:
 
-Additionally one may take advantages of symmetries present in the matrix element to reduce the sum over active flavours $(i,j)$ in
-Eq.~(\ref{eq:hadconv}) to a reduced number of partonic subprocesses with a replacement such as
-\begin{equation}
-\sum_{i,j} \hat{\sigma}^{(p)}_{ij\to X}
-f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)\rightarrow
-\sum_{s}^{N_{\rm sub}} \hat{\sigma}^{(p)(s)} F^{(s)}_{\alpha\beta,\tau}
-\end{equation}
-where the $s$ index runs over the $N_{\rm sub}$ (process-specific)
-parton subprocess:
-\begin{equation}\label{eq:APPLsubproc}
-  F^{(s)}_{\alpha\beta,\tau} =\sum_{i,j} C^{(s)}_{ij} 
-  f_i(x_{\alpha},Q^2_\tau)f_j(x_{\beta},Q^2_\tau)\,,
-\end{equation}
-and the $C^{(s)}_{ij}$ matrix encodes the combination of PDFs that
-contribute to the $s$-th subprocess and $\hat{\sigma}^{(p)(s)}$
-is the corresponding subprocess hard cross section. Finally, defining:
-\begin{equation}
-  W_{\alpha\beta,\tau}^{(p)(s)} = \mathcal{I}_\tau^{(n')}(Q^2)\int dx_1\,dx_2\,
-  \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha^{(n_1)}(x_1)
-  \,\mathcal{I}_\beta^{(n_2)}(x_2)\,,
-\end{equation}
-one can write Eq.~(\ref{eq:XsecPDFs}) as follows:
 \begin{equation} \label{eq:applconv}
   \sigma_{pp\to X} = \sum_p^{N_\alpha} \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta,\tau} 
   \alpha_s^{p+p_{\rm LO}}(Q^2_\tau)W_{\alpha\beta,\tau}^{(p)(s)} \, F_{\alpha\beta,\tau}^{(s)}\,.
 \end{equation}
+where
+\begin{equation}
+  W_{\alpha\beta,\tau}^{(p)(s)} = \mathcal{I}_\tau(Q^2)\int dx_1\,dx_2\,
+  \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha(x_1)
+  \,\mathcal{I}_\beta(x_2)\,,
+\end{equation}
+consists of the convolution of the hard cross-section with the interpolating polynomials. This information may be stored in a precomputed look-up table.
+The final expression for the cross-section in Eqn.~\ref{eq:applconv} therefore being considerably more computationally efficient inside a fit than the direct
+performance of the double-convolution.
 
-Additionally, a number of tools, $e.g.$ {\tt
+\subsection{The FastKernel method}
+A number of tools, $e.g.$ {\tt
   APFEL}~\cite{Bertone:2013vaa} or {\tt HOPPET}~\cite{Salam:2008qg},
 are available which perform PDF evolution via an analogous
 procedure. {\tt APFEL} in particular, is able to provide the so-called
