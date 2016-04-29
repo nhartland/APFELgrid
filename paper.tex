@@ -11,6 +11,10 @@
 %%
 \documentclass[preprint,12pt]{elsarticle}
 
+\textwidth=16.0cm \textheight=21.0cm 
+\topmargin 0cm \oddsidemargin 0cm 
+\setlength{\unitlength}{1mm}
+
 %% Use the option review to obtain double line spacing
 %% \documentclass[preprint,review,12pt]{elsarticle}
 
@@ -33,6 +37,8 @@
 
 %% The amssymb package provides various useful mathematical symbols
 \usepackage{amssymb}
+\usepackage{url,hyperref}
+
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
 
@@ -85,11 +91,13 @@
  \setlength{\rightmargin}{0pt}}}
  {\endlist}
 
-\journal{Computer Physics Communications}
+ \journal{Computer Physics Communications}
 
-\begin{document}
-
-\begin{frontmatter}
+ 
+ 
+ \begin{document}
+ 
+ \begin{frontmatter}
 
 %% Title, authors and addresses
 
@@ -114,6 +122,7 @@
 
 \title{{\tt APFELgrid}: a fast interface to hadronic observables for
   fits of parton densities}
+\tnotetext[mytitlenote]{Preprints: OUTP-16-09P, CERN-TH-2016-103}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{<author name>}
@@ -126,7 +135,7 @@
 
 \cortext[author] {Corresponding author.\\\textit{E-mail address:} nathan.hartland@physics.ox.ac.uk}
 \address[a]{Rudolf Peierls Centre for Theoretical Physics,\\ 1 Keble Road, University of Oxford, OX1 3NP, Oxford, UK}
-\address[b]{TH Unit, CERN, CH-1211 Geneva 23, Switzerland}
+\address[b]{Theory Department, CERN, CH-1211 Geneva 23, Switzerland}
 
 \begin{abstract}
 We present a new software package designed to aid the inclusion of hadronic
@@ -155,11 +164,14 @@ existing interfaces without any reduction in numerical accuracy.
 \begin{keyword}
 %% keywords here, in the form: keyword \sep keyword
 QCD; parton distribution functions; fast predictions.
-
 \end{keyword}
 
 \end{frontmatter}
 
+ \newpage
+
+\noindent {\Large \textbf{Program Summary}}\\
+ 
 \begin{small}
 \noindent
 {\em Manuscript Title:} {\tt APFELgrid}: a fast interface to hadronic observables for
@@ -198,7 +210,7 @@ QCD; parton distribution functions; fast predictions.
 
 \clearpage
 
-%%\tableofcontents
+\tableofcontents
 
 %% main text
 \section{Introduction}\label{sec:intro}
@@ -306,7 +318,7 @@ where
   \,\mathcal{I}_\beta(x_2)\,,
 \end{equation}
 consists of the convolution of the hard cross-section with the interpolating polynomials. This information may be stored in a precomputed look-up table.
-The final expression for the cross-section in Eqn.~\ref{eq:applconv} therefore being considerably more computationally efficient inside a fit than the direct
+The final expression for the cross-section in Eq.~(\ref{eq:applconv}) therefore being considerably more computationally efficient inside a fit than the direct
 performance of the double-convolution.
 
 \subsection{The FastKernel method}
@@ -393,25 +405,10 @@ Might want to mention possibility for generating 'fast' grids as the interpolati
 
 \section{Performance benchmarks}
 
-The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eqn.~\ref{eq:FKTable} from weight grids supplied by {\tt APPLgrid} files. In this section we shall examine the performance differences between the two expressions for cross-section prediction Eqn.~\ref{eq:applconv} ({\tt APPLgrid}) and Eqn.~\ref{eq:FK} ({\tt FK}). For a comprehensive benchmark, we shall consider a wide range of processes including LHC and Tevatron electroweak vector boson production measurements, inclusive jet data and $t\bar{t}$ total cross-sections. Predictions are provided for a wide range of kinematics, for a total of 52 source {\tt APPLgrid} files roughly corresponding to the full collider dataset of the forthcoming NNPDF3.1 PDF determination.
-
-\section{Conclusion}
-
+The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt APPLgrid} files. In this section we shall examine the performance differences between the two expressions for cross-section prediction Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt FK}). For a comprehensive benchmark, we shall consider a wide range of processes including LHC and Tevatron electroweak vector boson production measurements, inclusive jet data and $t\bar{t}$ total cross-sections. Predictions are provided for a wide range of kinematics, for a total of 52 source {\tt APPLgrid} files roughly corresponding to the full collider dataset of the forthcoming NNPDF3.1 PDF determination.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[ph]
-  \centering
-  \hspace*{-2.0cm}                                                           
-  \includegraphics[scale=0.5]{plots/t0}
-\caption{\small Performance comparisons between {\tt APFELgrid} with
-  AVX, SSE3 and double precision convolution and {\tt APPLgrid}
-  convolution time per point and process.}
-\label{fig:benchmark}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[ph]
+\begin{figure}[p]
   \centering
   \includegraphics[scale=0.5]{plots/t0a}
 \caption{\small Performance comparisons between {\tt APFELgrid} with
@@ -422,7 +419,7 @@ The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eq
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[ph]
+\begin{figure}[p]
   \centering                                      
   \includegraphics[scale=0.5]{plots/t0b}
 \caption{\small Performance comparisons between {\tt APFELgrid} with
@@ -432,6 +429,16 @@ The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eq
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+\section{Conclusion}
+
+
+\section*{Acknowledgements}
+
+We thanks the NNPDF Collaboration members for the support and
+motivation they gave us to write this work. V.~B. and N.~H. are
+supported by an European Research Council Starting Grant ``PDF4BSM''.
+S.~C. is supported by the HICCUP ERC Consolidator grant (614577).
 
 
 %% The Appendices part is started with the command \appendix;
