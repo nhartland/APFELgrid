@@ -260,34 +260,20 @@ implemantation of the {\tt FastKernel} method.
 \section{The FastKernel method}\label{sec:FastKernel}
 
 Hadron collider observables are typically computed in QCD by a double
-convolution of parton densities with a hard-scattering cross
-section. Consider for example the calculation of a general cross
-section $pp\to X$ with a set of PDFs $\{f\}$:
-\begin{equation} \label{eq:hadconv}
-  \sigma_{pp\to X} =
-  \sum_{i,j}^{N_F}\int dx_1\, dx_2\, f_i(x_1,Q^2)\;
-  \hat{\sigma}_{ij\to X}\; f_j(x_2,Q^2)\,,
-\end{equation}
-where $Q^2$ is the typical hard scale of the process and the indices
-$i,j$ sum over the active partonic species in the calculation. The
-partonic cross section $\hat{\sigma}_{ij\to X}$ admits the
-perturbative expansion
-\begin{equation}\label{eq:expansion}
-\hat{\sigma}_{ij\to X} = \alpha_s^{p_{\rm LO}}(Q^2) \sum_{p=0}^{N_\alpha} \alpha_s^{p}(Q^2)\hat{\sigma}^{(p)}_{ij\to X}
-\end{equation}
-$p_{\rm LO}$ being the $\alpha_s$ power of the leading-order
-contribution and $\hat{\sigma}^{(p)}_{ij\to X}$ the N$^p$LO
-contribution. Therefore to order $N_\alpha$ in QCD
+convolution of parton densities with a hard scattering cross-section. Consider for example the calculation of a general cross-section $pp\to X$ with a set of PDFs $\{f\}$:
 \begin{equation}\label{eq:pertexp}
   \sigma_{pp\to X} =
-  \sum_{i,j}^{N_F}\sum_{p=0}^{N_\alpha} \int dx_1\,dx_2\,
+  \sum_{i,j}\sum_{p=0} \int dx_1\,dx_2\,
   \hat{\sigma}^{(p)}_{ij\to X}\,\alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)\,.
 \end{equation}
+where $Q^2$ is the typical hard scale of the process, the indices
+$i,j$ sum over the active partonic species in the calculation, $p_{\rm LO}$ is the leading-order power of $\alpha_s$ for the process
+and $\hat{\sigma}^{(p)}_{ij\to X}$ the N$^p$LO contribution.
 
 The central observation of tools such as {\tt APPLgrid} and {\tt
   FastNLO} is that the PDF and $\alpha_S$ dependence may be factorised out of
-  the convolution via expansion over a set of interpolating functions in $Q^2$ and the
-  two values of parton-$x$. Explicitly, one may represent the PDFs and $\alpha_S$ as
+  the convolution via expansion over a set of interpolating functions, spanning $Q^2$ and the
+  two values of parton-$x$. For example one may represent the PDFs and $\alpha_S$ as
 \begin{equation}\label{eq:interpolation}
 \begin{array}{c}
 \displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,f_i(x_1,Q^2) f_j(x_2,Q^2)
@@ -295,13 +281,12 @@ The central observation of tools such as {\tt APPLgrid} and {\tt
 \\
 \displaystyle \sum_{\alpha,\beta,\tau} \alpha_s^{p+p_{\rm LO}}(Q_\tau^2)
   \,f_i(x_\alpha,Q_\tau^2)\,f_j(x_\beta,Q_\tau^2)
-  \,\mathcal{I}_\tau^{(n')}(Q^2)\,\mathcal{I}_\alpha^{(n_1)}(x_1)
-  \,\mathcal{I}_\beta^{(n_2)}(x_2)
+  \,\mathcal{I}_\tau(Q^2)\,\mathcal{I}_\alpha(x_1)
+  \,\mathcal{I}_\beta(x_2)
 \end{array}
 \end{equation}
-in terms of interpolating functions $\mathcal{I}_\tau^{(n')}(Q^2)$,
-$\mathcal{I}_\alpha^{(n_1)}(x_1)$, $\mathcal{I}_\beta^{(n_2)}(x_2)$
-(typically Lagrange polynomials) of degree $n'$, $n_1$, and $n_2$.
+in terms of the Lagrange basis polynomials $\mathcal{I}_\tau(Q^2)$,
+$\mathcal{I}_\alpha(x_1)$, $\mathcal{I}_\beta(x_2)$.
 Using these expressions for the PDFs in the double-convolution of Eq.~(\ref{eq:pertexp}) one finds:
 \begin{equation}\label{eq:XsecPDFs}
 \begin{array}{rcl}
@@ -328,9 +313,9 @@ parton subprocess:
   F^{(s)}_{\alpha\beta,\tau} =\sum_{i,j} C^{(s)}_{ij} 
   f_i(x_{\alpha},Q^2_\tau)f_j(x_{\beta},Q^2_\tau)\,,
 \end{equation}
-where the $C^{(s)}_{ij}$ matrix encodes the combination of PDFs that
+and the $C^{(s)}_{ij}$ matrix encodes the combination of PDFs that
 contribute to the $s$-th subprocess and $\hat{\sigma}^{(p)(s)}$
-is the corresponding hard cross section. Finally, defining:
+is the corresponding subprocess hard cross section. Finally, defining:
 \begin{equation}
   W_{\alpha\beta,\tau}^{(p)(s)} = \mathcal{I}_\tau^{(n')}(Q^2)\int dx_1\,dx_2\,
   \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha^{(n_1)}(x_1)
@@ -418,11 +403,12 @@ analogously interpolated DGLAP evolution operators. Such a combination
 enables for a maximally computationally-efficient expression for the
 calculation of observables at hadron colliders.
 
-\section{{\tt APFELgrid} manual}
-
-\section{Benchmark}
+\section{Performance benchmarks}
 
 In this section we discuss...
+
+\section{Conclusion}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[ph]
