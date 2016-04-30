@@ -67,6 +67,7 @@
 %% \biboptions{comma,round}
 
 % \biboptions{}
+\biboptions{numbers,sort&compress}
 
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
@@ -227,7 +228,7 @@ of the partonic hard cross sections in such a way that the numerical convolution
 This interpolation strategy is implemented in the {\tt
   APPLgrid}~\cite{Carli:2010rw} and {\tt
   FastNLO}~\cite{Wobisch:2011ij} projects. For the computation of the hard
-cross sections, these packages rely on external codes to which they
+cross-sections, these packages rely on external codes to which they
 are interfaced by means of a suite of
 functions allowing for the filling of PDF- and
 $\alpha_s$-independent look-up tables of cross-section weights. Codes
@@ -252,22 +253,28 @@ for PDF analyses is becoming increasingly important.
 
 The {\tt FastKernel} method, developed in the framework of
 the NNPDF global analyses~\cite{Ball:2010de}, was developed to address
-this problem. This method differs from the standard procedure \`{a} la {\tt APPLgrid} or {\tt fastNLO} in that it
+this problem. This method differs from the standard procedure \`{a} la {\tt APPLgrid} or {\tt FastNLO} in that it
 maximises the amount of information that is precomputed prior to fitting such as to minimise the amount
 of operations to be performed during the fit. Specifically, the {\tt FastKernel} method relies on the precomputation
-of the partonic hard cross sections and DGLAP evolution kernels
+of the partonic hard cross-sections and DGLAP evolution kernels
 and their combination into a single look-up table, here called a {\tt FastKernel} ({\tt FK}) table, in such a way that the prediction for a given hadronic
 observable can be obtained by a simple matrix product between
 the respective {\tt FK} table and the initial scale PDFs.
 
-In this paper we present the {\tt APFELgrid} package, a public implementation of the {\tt
-  FastKernel} method in which the hard partonic cross sections provided in an {\tt APPLgrid} look-up table are combined with the DGLAP
-evolution kernels provided by the {\tt APFEL}
-package~\cite{Bertone:2013vaa}.
+In this paper we present the {\tt APFELgrid} package, a public
+implementation of the {\tt FastKernel} method in which the hard
+partonic cross sections provided in an {\tt APPLgrid} look-up table
+are combined with the DGLAP evolution kernels provided by the {\tt
+  APFEL}
+package~\cite{Bertone:2013vaa,Carrazza:2014gfa,Bertone:2015cwa,Bertone:2015lqa,Carrazza:2015dea,Bertone:2015gba}.
 
 The outline of this paper is the following. In
-Sect.~\ref{sec:FastKernel} we present the tecnical details of the
-implemantation of the {\tt FastKernel} method.
+Sect.~\ref{sec:FastKernel} we present the technical details of the
+implementation of the {\tt FastKernel} method. Then, in
+Sect.~\ref{sec:benchmark} we illustrate timings and performance
+results of the {\tt APFELgrid} library and grids. Finally, in
+Sect.~\ref{sec:conclusion} we conclude and discuss possible future
+developments.
 
 \section{Interpolation tools for collider observables}\label{sec:FastKernel}
 
@@ -323,14 +330,14 @@ performance of the double-convolution.
 
 \subsection{The FastKernel method}
 A number of tools, $e.g.$ {\tt
-  APFEL}~\cite{Bertone:2013vaa} or {\tt HOPPET}~\cite{Salam:2008qg},
-are available which perform PDF evolution via an analogous
-procedure. {\tt APFEL} in particular, is able to provide the so-called
-\textit{evolution operator}. The evolution operator, is computed
-assuming that the DGLAP evolution can be encoded in a single operator
-whose action on the intial scale PDFs proceduces the final scale
-PDFs. Taking $Q_0$ as an initial scale and $Q_\tau$ as a final scale,
-on the $x$-space grid one can write:
+  APFEL}~\cite{Bertone:2013vaa,Carrazza:2014gfa,Bertone:2015cwa,Bertone:2015lqa,Carrazza:2015dea,Bertone:2015gba}
+or {\tt HOPPET}~\cite{Salam:2008qg}, are available which perform PDF
+evolution via an analogous procedure. {\tt APFEL} in particular, is
+able to provide the so-called \textit{evolution operator}. The
+evolution operator, is computed assuming that the DGLAP evolution can
+be encoded in a single operator whose action on the intial scale PDFs
+proceduces the final scale PDFs. Taking $Q_0$ as an initial scale and
+$Q_\tau$ as a final scale, on the $x$-space grid one can write:
 \begin{equation}\label{eq:fastPDFfinal_recalled}
   f_i(x_{\alpha},Q^2_\tau) = \sum_{k}
   \sum_\beta A^\tau_{\alpha\beta, ik}\;
@@ -404,34 +411,81 @@ Explain reduced flexibility w.r.t $\alpha_S$ variations and scales, discuss incr
 Might want to mention possibility for generating 'fast' grids as the interpolation accuracy is decoupled.
 
 \section{Performance benchmarks}
+\label{sec:benchmark}
 
-The {\tt APFELgrid} plugin generates {\tt FK} tables of the form expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt APPLgrid} files. In this section we shall examine the performance differences between the two expressions for cross-section prediction Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt FK}). For a comprehensive benchmark, we shall consider a wide range of processes including LHC and Tevatron electroweak vector boson production measurements, inclusive jet data and $t\bar{t}$ total cross-sections. Predictions are provided for a wide range of kinematics, for a total of 52 source {\tt APPLgrid} files roughly corresponding to the full collider dataset of the forthcoming NNPDF3.1 PDF determination.
+The {\tt APFELgrid} plugin generates {\tt FK} tables of the form
+expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt
+  APPLgrid} files. In this section we shall examine the performance
+differences between the two expressions for cross-section prediction
+Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt
+  FK}).
+%
+For a comprehensive benchmark, we consider here a wide range of
+processes including LHC and Tevatron electroweak vector boson
+production measurements, $t\bar{t}$ total cross-sections,
+double-differential Drell-Yan cross-sections and inclusive jet
+data. Predictions are provided for a wide range of kinematics, for a
+total of 52 source {\tt APPLgrid} files roughly corresponding to the
+full collider dataset of the forthcoming NNPDF3.1 PDF determination.
+
+In Fig.~\ref{fig:timings} we compare the convolution time per point
+between {\tt APFELgrid} and {\tt APPLgrid} for all the 52
+processes. We show timings for the {\tt APFELgrid} library in four
+different configurations: AVX-OpenMP 2x (2 CPUs), AVX SSE3, and
+standard double precision dot product convolution. When comparing the
+results we observe a great performance improvement for convolution
+time per point when using {\tt APFELgrid}. In particular, when
+comparing {\tt APFELgrid} AVX to {\tt APPLgrid} timings we obtain a
+minimum of x10 improvement for electroweak vector boson production and
+a maximum of x2000 for inclusive jet data. These results confirm the
+great usefulness of {\tt APFELgrid} in terms of performance for fits
+of PDFs.
+
+In Fig.~\ref{fig:performance} we provide information about the {\tt
+  APFELgrid} table generation, grid size and memory usage. In terms of
+generation time per point, we observe a timings from few milliseconds
+to 3.5 minutes per point. Such difference is almost due to the density
+of weights contained in the input {\tt APFELgrid} requiring a larger
+number of combination operations. When considering the grid size, we
+confirm, as expected, that in several processes the {\tt APPLgrid}
+files are smaller than {\tt APFELgrid} ones. This feature is justified
+by the lack of compression of {\tt APFELgrid} files. Finally, when
+measuring the resident set size memory used by the convolution
+programs, the amount of memory required by {\tt APFELgrid} is smaller
+than {\tt APPLgrid} for all processes considered here.
+
+In conclusion, the great performance benefits obtained with {\tt
+  APFELgrid} endorse the importance of this tool not only in PDF fits
+but also in any application requiring a large number of convolutions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[p]
+\begin{figure}
   \centering
   \includegraphics[scale=0.6]{plots/t0a}
 \caption{\small Performance comparisons between {\tt APFELgrid} with
-  AVX, SSE3 and double precision convolution and {\tt APPLgrid}
-  convolution time per point and process.}
-\label{fig:benchmark}
+  AVX-OpenMP 2x, AVX, SSE3, double precision convolution and {\tt
+    APPLgrid} convolution time per point and process.}
+\label{fig:timings}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[p]
+\begin{figure}
   \centering                                      
   \includegraphics[scale=0.6]{plots/t0b}
-\caption{\small Performance comparisons between {\tt APFELgrid} with
-  AVX, SSE3 and double precision convolution and {\tt APPLgrid}
-  convolution time per point and process.}
-\label{fig:benchmark}
+\caption{\small {\tt APFELgrid} generation time per point and
+  comparison to {\tt APPLgrid} for grid size and resident set size
+  (RSS).}
+\label{fig:performance}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \section{Conclusion}
+\label{sec:conclusion}
 
+In this work we presented {\tt APFELgrid}, an efficient convolution
+interface to hadronic observables for fits of parton densities.
 
 \section*{Acknowledgements}
 
@@ -457,9 +511,9 @@ S.~C. is supported by the HICCUP ERC Consolidator grant (614577).
 %%
 
 %% References with bibTeX database:
-
+\section*{References}
 \bibliographystyle{elsarticle-num}
-\bibliography{paper.bib}
+\bibliography{paper}
 
 %% Authors are advised to submit their bibtex database files. They are
 %% requested to list a bibtex style file in the manuscript if they do
