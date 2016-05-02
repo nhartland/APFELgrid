@@ -139,27 +139,29 @@
 \address[b]{Theoretical Physics Department, CERN, Geneva, Switzerland}
 
 \begin{abstract}
-We present a new software package designed to aid the inclusion of hadronic
-observables into Parton Distribution Function (PDF) fits. The {\tt APFELgrid} package
-converts interpolated weight tables provided by {\tt APPLgrid} files into a more efficient
-format for PDF fitting by the pre-computation and combination with PDF and $\alpha_s$ evolution factors provided
-by {\tt APFEL}. This combination significantly reduces the number of operations required to perform the calculation
-of hadronic observables in PDF fits and simplifies the structure of the calculation into
-a readily optimised scalar product. We demonstrate that our technique
-can lead to a substantial speed improvement as compared to the
-existing interfaces without any reduction in numerical accuracy.
-
-%We present a new method conceived to ease the inclusion of hadronic
-%observables into parton distribution function (PDF) fits. Our
-%technique relies on the the same principles adopted by the existing
-%fast interfaces but implements a set of improvements aimed at
-%optimizing the performance in the context of PDF fits where many
-%iterations and many predictions for each iteration are usually
-%required. The main novelties are the precomputation of the PDF and
-%$\alpha_s$ evolution and the optimisation of the numerical convolution
-%between hard cross sections and PDFs. We demonstrate that our technique
-%can lead to a substantial speed improvement as compared to the
-%existing interfaces.
+  We present a new software package designed to aid the inclusion of
+  hadronic observables into Parton Distribution Function (PDF)
+  fits. The {\tt APFELgrid} package converts interpolated weight
+  tables provided by {\tt APPLgrid} files into a more efficient format
+  for PDF fitting by the pre-computation and combination with PDF and
+  $\alpha_s$ evolution factors provided by {\tt APFEL}. This
+  combination significantly reduces the number of operations required
+  to perform the calculation of hadronic observables in PDF fits and
+  simplifies the structure of the calculation into a readily optimised
+  scalar product. We demonstrate that our technique can lead to a
+  substantial speed improvement as compared to the existing interfaces
+  without any reduction in numerical accuracy.
+  % We present a new method conceived to ease the inclusion of
+  % hadronic observables into parton distribution function (PDF)
+  % fits. Our technique relies on the the same principles adopted by
+  % the existing fast interfaces but implements a set of improvements
+  % aimed at optimizing the performance in the context of PDF fits
+  % where many iterations and many predictions for each iteration are
+  % usually required. The main novelties are the precomputation of the
+  % PDF and $\alpha_s$ evolution and the optimisation of the numerical
+  % convolution between hard cross sections and PDFs. We demonstrate
+  % that our technique can lead to a substantial speed improvement as
+  % compared to the existing interfaces.
 \end{abstract}
 
 \begin{keyword}
@@ -216,40 +218,50 @@ QCD; parton distribution functions; fast predictions.
 %% main text
 \section{Introduction}\label{sec:intro}
 
-The ability to perform fast and accurate cross-section predictions for measurements at
-the Large Hadron Collider (LHC) is a vital requirement for the most precise PDF determinations. LHC measurements have a unique
-capacity to shed light upon the dynamics of the proton and provide stringent constraints upon 
-the proton PDF. In order to make full use of current and future LHC data, efficient strategies
-for the computation of predictions for these observables must be deployed. Software packages performing predictions 
-for non-inclusive hadron-collider observables cannot be easily deployed in a PDF fit requiring rapid iteration due the time required to obtain accurate results (usually of the order of a few hours or more
-per data point). In order to overcome this limitation, the typical strategy adopted for fast cross-section prediction relies on the precomputation
-of the partonic hard cross sections in such a way that the numerical convolution with any set of PDFs can be quickly performed by means of interpolation techniques.
+The ability to perform fast and accurate cross-section predictions for
+measurements at the Large Hadron Collider (LHC) is a vital requirement
+for the most precise PDF determinations. LHC measurements have a
+unique capacity to shed light upon the dynamics of the proton and
+provide stringent constraints upon the proton PDF. In order to make
+full use of current and future LHC data, efficient strategies for the
+computation of predictions for these observables must be
+deployed. Software packages performing predictions for non-inclusive
+hadron-collider observables cannot be easily deployed in a PDF fit
+requiring rapid iteration due the time required to obtain accurate
+results (usually of the order of a few hours or more per data
+point). In order to overcome this limitation, the typical strategy
+adopted for fast cross-section prediction relies on the precomputation
+of the partonic hard cross sections in such a way that the numerical
+convolution with any set of PDFs can be quickly performed by means of
+interpolation techniques.
 
 This interpolation strategy is implemented in the {\tt
   APPLgrid}~\cite{Carli:2010rw} and {\tt
-  FastNLO}~\cite{Wobisch:2011ij} projects. For the computation of the hard
-cross-sections, these packages rely on external codes to which they
-are interfaced by means of a suite of
-functions allowing for the filling of PDF- and
-$\alpha_s$-independent look-up tables of cross-section weights. Codes
-such as {\tt MCFM}~\cite{Campbell:2010ff} and {\tt NLOJet++}~\cite{Nagy:2003tz} have been interfaced directly to 
- {\tt APPLgrid}/{\tt FastNLO} and more recently dedicated interfaces to
+  FastNLO}~\cite{Wobisch:2011ij} projects. For the computation of the
+hard cross-sections, these packages rely on external codes to which
+they are interfaced by means of a suite of functions allowing for the
+filling of PDF- and $\alpha_s$-independent look-up tables of
+cross-section weights. Codes such as {\tt MCFM}~\cite{Campbell:2010ff}
+and {\tt NLOJet++}~\cite{Nagy:2003tz} have been interfaced directly to
+{\tt APPLgrid}/{\tt FastNLO} and more recently dedicated interfaces to
 automated general-purpose Monte Carlo (MC) event generators have been
-developed. The {\tt aMCfast} and {\tt MCgrid} codes
-have been specifically designed to extract the relevant information
-from the {\tt MadGraph5\_aMC@NLO}~\cite{Alwall:2014hca} and {\tt
+developed. The {\tt aMCfast}~\cite{Bertone:2014zva} and {\tt
+  MCgrid}~\cite{DelDebbio:2013kxa} codes have been specifically
+designed to extract the relevant information from the {\tt
+  MadGraph5\_aMC@NLO}~\cite{Alwall:2014hca} and {\tt
   SHERPA}~\cite{Gleisberg:2008ta} event generators respectively.
 
-While these tools have proven to be extremely useful in the
-extraction of parton densities, the volume of experimental data
-made available by LHC collaborations for use in PDF fits is already
-stretching the capabilities of typical fitting technology. Presently a typical global PDF fit includes
-thousands of hadronic data points for which predictions have to be
-computed thousands of times during the minimisation process. As a
-consequence the ``standard'' tools, $i.e.$ {\tt APPLgrid} and {\tt
-  FastNLO}, might not be fast enough to meet the needs of modern
-PDF fitters. For this reason a high-performance tool tailored specifically 
-for PDF analyses is becoming increasingly important.
+While these tools have proven to be extremely useful in the extraction
+of parton densities, the volume of experimental data made available by
+LHC collaborations for use in PDF fits is already stretching the
+capabilities of typical fitting technology. Presently a typical global
+PDF fit includes thousands of hadronic data points for which
+predictions have to be computed thousands of times during the
+minimisation process. As a consequence the ``standard'' tools, $i.e.$
+{\tt APPLgrid} and {\tt FastNLO}, might not be fast enough to meet the
+needs of modern PDF fitters. For this reason a high-performance tool
+tailored specifically for PDF analyses is becoming increasingly
+important.
 
 The {\tt FastKernel} method, developed in the framework of the NNPDF
 global analyses~\cite{Ball:2010de,Ball:2014uwa}, was developed to
@@ -283,7 +295,9 @@ developments.
 \section{Interpolation tools for collider observables}\label{sec:FastKernel}
 
 Hadron collider observables are typically computed in QCD by a double
-convolution of parton densities with a hard scattering cross-section. Consider for example the calculation of a general cross-section $pp\to X$ with a set of PDFs $\{f\}$:
+convolution of parton densities with a hard scattering
+cross-section. Consider for example the calculation of a general
+cross-section $pp\to X$ with a set of PDFs $\{f\}$:
 \begin{equation}\label{eq:hadconv}
   \sigma_{pp\to X} =
   \sum_{s}\sum_{p} \int dx_1\,dx_2\,
@@ -297,12 +311,15 @@ subprocess parton density:
   F^{(s)}(x_1,x_2, Q^2) =\sum_{i,j} C^{(s)}_{ij} 
   f_i(x_{1},Q^2)f_j(x_{2},Q^2)\,,
 \end{equation}
-where the $C^{(s)}_{ij}$ matrix enumerates the combinations of PDFs that
-contribute to the $s$-th subprocess.
-The central observation of tools such as {\tt APPLgrid} and {\tt
-  FastNLO} is that the PDF and $\alpha_S$ dependence may be factorised out of
-  the convolution via expansion over a set of interpolating functions, spanning $Q^2$ and the
-  two values of parton-$x$. For example one may represent the subprocess PDFs and $\alpha_S$ in terms of the Lagrange basis polynomials $\mathcal{I}_\tau(Q^2)$, $\mathcal{I}_\alpha(x_1)$ and $\mathcal{I}_\beta(x_2)$ as:
+where the $C^{(s)}_{ij}$ matrix enumerates the combinations of PDFs
+that contribute to the $s$-th subprocess.  The central observation of
+tools such as {\tt APPLgrid} and {\tt FastNLO} is that the PDF and
+$\alpha_S$ dependence may be factorised out of the convolution via
+expansion over a set of interpolating functions, spanning $Q^2$ and
+the two values of parton-$x$. For example one may represent the
+subprocess PDFs and $\alpha_S$ in terms of the Lagrange basis
+polynomials $\mathcal{I}_\tau(Q^2)$, $\mathcal{I}_\alpha(x_1)$ and
+$\mathcal{I}_\beta(x_2)$ as:
 \begin{equation}\label{eq:interpolation}
 \begin{array}{c}
 \displaystyle \alpha_s^{p+p_{\rm LO}}(Q^2) \,F^{(s)}(x_1,x_2, Q^2)
@@ -314,9 +331,12 @@ The central observation of tools such as {\tt APPLgrid} and {\tt
   \,\mathcal{I}_\beta(x_2)
 \end{array}
 \end{equation}
-where we use the shorthand $F^{(s)}_{\alpha\beta ,\tau} = F^{(s)}(x_\alpha, x_\beta,Q_\tau^2)$.
-Using these expressions in the double-convolution of Eq.~(\ref{eq:hadconv}) one can finally obtain an expression for the desired
-cross-section which depends upon the subprocess PDFs only though a simple product:
+where we use the shorthand
+$F^{(s)}_{\alpha\beta ,\tau} = F^{(s)}(x_\alpha, x_\beta,Q_\tau^2)$.
+Using these expressions in the double-convolution of
+Eq.~(\ref{eq:hadconv}) one can finally obtain an expression for the
+desired cross-section which depends upon the subprocess PDFs only
+though a simple product:
 
 \begin{equation} \label{eq:applconv}
   \sigma_{pp\to X} = \sum_p^{N_\alpha} \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta,\tau} 
@@ -328,11 +348,15 @@ where
   \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha(x_1)
   \,\mathcal{I}_\beta(x_2)\,,
 \end{equation}
-consists of the convolution of the hard cross-section with the interpolating polynomials. This information may be stored in a precomputed look-up table.
-The final expression for the cross-section in Eq.~(\ref{eq:applconv}) therefore being considerably more computationally efficient inside a fit than the direct
-performance of the double-convolution.
+consists of the convolution of the hard cross-section with the
+interpolating polynomials. This information may be stored in a
+precomputed look-up table.  The final expression for the cross-section
+in Eq.~(\ref{eq:applconv}) therefore being considerably more
+computationally efficient inside a fit than the direct performance of
+the double-convolution.
 
 \subsection{The FastKernel method}
+
 A number of tools, $e.g.$ {\tt
   APFEL}~\cite{Bertone:2013vaa,Carrazza:2014gfa,Bertone:2015cwa,Bertone:2015lqa,Carrazza:2015dea,Bertone:2015gba}
 or {\tt HOPPET}~\cite{Salam:2008qg}, are available which perform PDF
@@ -347,8 +371,8 @@ $Q_\tau$ as a final scale, on the $x$-space grid one can write:
   \sum_\beta A^\tau_{\alpha\beta, ik}\;
   f_k(x_\beta,Q^2_0)\,, 
 \end{equation}
-where the operator $A$ is the solution of the DGLAP evolution
-equation with baundary condition:
+where the operator $A$ is the solution of the DGLAP evolution equation
+with baundary condition:
 \begin{equation}
 A^\tau_{\alpha\beta, ik} =
 \delta_{\alpha\beta}\delta_{ik}\qquad\mbox{for}\qquad Q_\tau = Q_0\,.
@@ -410,9 +434,14 @@ enables for a maximally computationally-efficient expression for the
 calculation of observables at hadron colliders.
 
 \subsection{Properties of {\tt FK} tables}
-Some discussion here of the expected performance differences. Including precomputed sums over scale, perturbative order, no need to perform PDF evolution on the fly, smaller initial scale PDF basis, simple convolution structure that can be accellerated with SIMD/OpenMP.
-Explain reduced flexibility w.r.t $\alpha_S$ variations and scales, discuss increased storage space requirement but also reduced memory footprint.
-Might want to mention possibility for generating 'fast' grids as the interpolation accuracy is decoupled.
+Some discussion here of the expected performance
+differences. Including precomputed sums over scale, perturbative
+order, no need to perform PDF evolution on the fly, smaller initial
+scale PDF basis, simple convolution structure that can be accellerated
+with SIMD/OpenMP.  Explain reduced flexibility w.r.t $\alpha_S$
+variations and scales, discuss increased storage space requirement but
+also reduced memory footprint.  Might want to mention possibility for
+generating 'fast' grids as the interpolation accuracy is decoupled.
 
 \section{Performance benchmarks}
 \label{sec:benchmark}
@@ -461,7 +490,8 @@ than {\tt APFELgrid} ones as expected. This feature is justified by
 the lack of compression of {\tt APFELgrid} files. Finally, when
 measuring the resident set size memory used by the convolution
 programs, the amount of memory required by {\tt APFELgrid} is smaller
-than {\tt APPLgrid} for all processes considered here by at least 75\%.
+than {\tt APPLgrid} for all processes considered here by at least
+75\%.
 
 In conclusion, the great performance benefits obtained with {\tt
   APFELgrid} endorse the importance of this tool not only in PDF fits
@@ -489,12 +519,51 @@ but also in any application requiring a large number of convolutions.
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Conclusion}\label{sec:conclusion}
 
-\section{Conclusion}
-\label{sec:conclusion}
+In this work we have presented {\tt APFELgrid}, an efficient
+convolution interface to hadronic observables for fits of parton
+densities. We have demonstrated that employing the so-called {\tt
+  FastKernel} method, it is possible to convert an {\tt APPLgrid}
+weight table into a derived format, referred to as {\tt FKtable},
+which includes PDF and $\alpha_s$ evolution as provided by {\tt
+  APFEL}.  Such a procedure allows one to obtain a very
+computationally-efficient expression for the calculation of hadronic
+cross sections, in terms of only the initial-scale PDFs and summing
+only over the initial scale interpolating grid and the incoming parton
+flavors. In addition, the simple structure of the resulting
+convolution makes {\tt FKtables} particularly suitable to make
+efficient use of acceleration and parallelization techniques like {\tt
+  SIMD} and {\tt OpenMD}.
 
-In this work we presented {\tt APFELgrid}, an efficient convolution
-interface to hadronic observables for fits of parton densities.
+We have shown that the numerical convolution of an {\tt APFELgrid}
+tables is typically much faster than the corresponding {\tt
+  APPLgrid}. In particular, the {\tt FastKernel} method provides a
+great perfomance improvement with respect to {\tt APPLgrid} which is
+further enhanced by the employment of any of the acceleration
+techniques available in {\tt APFELgrid}. Finally, while the size of an
+{\tt FKtable} is often larger than the corresponding {\tt APFELgrid}
+file, we have shown that the resident set size memory required by {\tt
+  APFELgrid} is typically smaller than {\tt APPLgrid} by at least
+75\%.
+
+The subtantial speed improvement with respect to {\tt APPLgrid} in
+association with the reduction of the resident set size memory, makes
+the {\tt APFELgrid} code a valuable tool for modern PDF fits which
+usually incluse thousands of hadronic data points and that thus
+heavily rely on fast interfaces. We stress that {\tt APFELgrid} is not
+a replacement for {\tt APPLgrid}, on which it depends, but it is
+rather a specialized tool conceived to ease the inclusion of hadronic
+data into PDF fits. In fact, the price of a better performance is the
+fact that, by themselves, {\tt FKtables} cannot perform any parameter
+variation other than that of PDFs. For example, variations of
+$\alpha_s$ can be performed only by re-computing the {\tt FKtables}.
+
+The {\tt APFELgrid} code is publicly available from the webpage:
+\begin{center}
+\url{https://github.com/nhartland/APFELgrid}
+\end{center}
+where intructions to install and run codes are also provided.
 
 \section*{Acknowledgements}
 
