@@ -289,8 +289,8 @@ Sect.~\ref{sec:FastKernel} we present the technical details of the
 implementation of the {\tt FastKernel} method. Then, in
 Sect.~\ref{sec:benchmark} we illustrate timings and performance
 results of the {\tt APFELgrid} library and grids. Finally, in
-Sect.~\ref{sec:conclusion} we conclude and discuss possible future
-developments.
+Sect.~\ref{sec:conclusion} we summarise the results discussed in this
+work.
 
 \section{Interpolation tools for collider observables}\label{sec:FastKernel}
 
@@ -434,23 +434,47 @@ enables for a maximally computationally-efficient expression for the
 calculation of observables at hadron colliders under PDF variation.
 
 \subsection{Features and limitations of {\tt FK} tables}
-The {\tt FK} product of Eqn.~\ref{eq:FK} differs with respect to the product in Eqn.~\ref{eq:applconv} in several notable ways. Firstly 
-the typical {\tt APPLgrid} or {\tt FastNLO} products require PDFs at a general scale $Q^2$, which implies performing PDF evolution e.g Eqn.~\ref{eq:fastPDFfinal_recalled} for every variation of the PDFs at the input scale during the fit. However in the {\tt FK} convolution this evolution
-is pre-cached at the stage of {\tt FK} table generation, requiring only initial-scale PDFs as an input at fitting time. This pre-caching of the evolution
-also removes the need for performing the sums over hard scale and perturbative order during the fit, further reducing the number of operations required.
-The {\tt FK} convolution also benefits from the typically reduced number of active partonic modes at the fitting scale, with the sum over flavours in Eqn.~\ref{eq:FK} being limited to those directly used in the fit. Having reduced the calculation to such a simple form, it is also possible to straightforwardly
-apply standard and widely-available computational tools such as multi-threading through e.g OpenMP or Single Instruction Multiple Data (SIMD) operations e.g SSE or AVX to further reduce computational cost.
 
-While these features provide significant performance enhancements, the {\tt FK } table format is not suitable as a complete replacement for tools
-such as {\tt APPLgrid}. The pre-computation of the PDF evolution necessarily means that all theory parameters such as perturbative order, strong coupling and factorization/renormalization scales are inextricably embedded in each {\tt FK} table. In order to perform PDF fits including variations of these parameters, multiple {\tt FK } tables must be computed, each with different theory settings. While performing such a re-calculation directly from Monte Carlo codes
-would be exceptionally time consuming, the data representation in {\tt APPLgrid} files allows for an efficient combination with varying theory parameters.
+The {\tt FK} product of Eq.~(\ref{eq:FK}) differs with respect to the
+product in Eq.~(\ref{eq:applconv}) in several notable ways. Firstly
+the typical {\tt APPLgrid} or {\tt FastNLO} products require PDFs at a
+general scale $Q^2$, which implies performing PDF evolution {\it e.g.}
+Eq.~(\ref{eq:fastPDFfinal_recalled}) for every variation of the PDFs
+at the input scale during the fit. However in the {\tt FK} convolution
+this evolution is pre-cached at the stage of {\tt FK} table
+generation, requiring only initial-scale PDFs as an input at fitting
+time. This pre-caching of the evolution also removes the need for
+performing the sums over hard scale and perturbative order during the
+fit, further reducing the number of operations required.  The {\tt FK}
+convolution also benefits from the typically reduced number of active
+partonic modes at the fitting scale, with the sum over flavours in
+Eq.~(\ref{eq:FK}) being limited to those directly used in the
+fit. Having reduced the calculation to such a simple form, it is also
+possible to straightforwardly apply standard and widely-available
+computational tools such as multi-threading through e.g OpenMP or
+Single Instruction Multiple Data (SIMD) operations e.g SSE or AVX to
+further reduce computational cost.
+
+While these features provide significant performance enhancements, the
+{\tt FK} table format is not suitable as a complete replacement for
+tools such as {\tt APPLgrid}. The pre-computation of the PDF evolution
+necessarily means that all theory parameters such as perturbative
+order, strong coupling and factorization/renormalization scales are
+inextricably embedded in each {\tt FK} table. In order to perform PDF
+fits including variations of these parameters, multiple {\tt FK}
+tables must be computed, each with different theory settings. While
+performing such a re-calculation directly from Monte Carlo codes would
+be exceptionally time consuming, the data representation in {\tt
+  APPLgrid} files allows for an efficient combination with varying
+theory parameters.
 
 \section{Performance benchmarks}
 \label{sec:benchmark}
 
-In this section we shall examine the performance
-differences between the two expressions for cross-section prediction
-Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt FK}).
+In this section we shall examine the performance differences between
+the two expressions for cross-section prediction
+Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt
+  FK}).
 %
 To provide a comprehensive benchmark, we consider here a wide range of
 processes including LHC and Tevatron electroweak vector boson
@@ -461,34 +485,54 @@ cross-sections~\cite{ATLAS:2012aa,ATLAS:2011xha,TheATLAScollaboration:2013dja,Ch
 double-differential Drell-Yan
 cross-sections~\cite{Chatrchyan:2013tia,CMS:2014jea} and inclusive jet
 data~\cite{Chatrchyan:2012bja,Aad:2011fc,Aad:2013lpa,Abazov:2007jy}. Predictions
-are performed over a wide range of kinematics, for a total of 52 source
-{\tt APPLgrid} files corresponding to the majority of available LHC and Tevatron datasets of applicability to PDF determination.
-While the source {\tt APPLgrid} files have varying grid densities in $x$ and $Q^2$, for the purposes of comparison the corresponding {\tt FK} tables are produced
-consistently with 30 points in $x$, and at an initial scale below the charm threshold, therefore with seven active partonic species.
+are performed over a wide range of kinematics, for a total of 52
+source {\tt APPLgrid} files corresponding to the majority of available
+LHC and Tevatron datasets of applicability to PDF determination.
+While the source {\tt APPLgrid} files have varying grid densities in
+$x$ and $Q^2$, for the purposes of comparison the corresponding {\tt
+  FK} tables are produced consistently with 30 points in $x$, and at
+an initial scale below the charm threshold, therefore with seven
+active partonic species.
 
-In Fig.~\ref{fig:timings} we compare the average time taken per datapoint
-for the {\tt FK} and {\tt APPLgrid} calculations, for all of the 52
-tables. We show timings for the {\tt FK} calculation in four
+In Fig.~\ref{fig:timings} we compare the average time taken per
+datapoint for the {\tt FK} and {\tt APPLgrid} calculations, for all of
+the 52 tables. We show timings for the {\tt FK} calculation in four
 different configurations: AVX-OpenMP 2x (2 CPU cores), AVX, SSE3 and
-standard double precision dot product. Due to the inherent structural differences between the {\tt FK} and {\tt APPLgrid} procedures,
-results from the {\tt FK} calculation are systematically faster than those from {\tt APPLgrids}.
-In particular, when comparing {\tt FK} AVX to {\tt APPLgrid} timings we obtain minimally a factor
-of ten improvement in speed for electroweak vector boson production and
-a maximum factor of 2000 improvement in predictions for inclusive jet data. Across all processes
-and kinematic regions we observe significant performance improvements from using the {\tt FK} calculation
-even in the maximally compatible, non-SIMD case.
+standard double precision dot product. Due to the inherent structural
+differences between the {\tt FK} and {\tt APPLgrid} procedures,
+results from the {\tt FK} calculation are systematically faster than
+those from {\tt APPLgrids}.  In particular, when comparing {\tt FK}
+AVX to {\tt APPLgrid} timings we obtain minimally a factor of ten
+improvement in speed for electroweak vector boson production and a
+maximum factor of 2000 improvement in predictions for inclusive jet
+data. Across all processes and kinematic regions we observe
+significant performance improvements from using the {\tt FK}
+calculation even in the maximally compatible, non-SIMD case.
 
-While sheer computational speed is typically the primary consideration when computing observables
-in a PDF fit, other factors such as table size in the filesystem and memory, along with the computational cost of
-pre-computing {\tt FK} tables must be considered. Indeed, the computation of the {\tt FK} table in Eqn.~\ref{eq:FKTable}
-requires a great deal of operations which can be time consuming, particuarly in the case of source {\tt APPLgrids} with very high
-interpolation precision.
+While sheer computational speed is typically the primary consideration
+when computing observables in a PDF fit, other factors such as table
+size in the filesystem and memory, along with the computational cost
+of pre-computing {\tt FK} tables must be considered. Indeed, the
+computation of the {\tt FK} table in Eq.~(\ref{eq:FKTable}) requires a
+great deal of operations which can be time consuming, particuarly in
+the case of source {\tt APPLgrids} with very high interpolation
+precision.
 
-In Fig.~\ref{fig:performance} we examine the {\tt FK} table generation time with {\tt APFELgrid}, {\tt FK} table file size and memory usage of the {\tt FK} tables arising from the same source {\tt APPLgrids} as discussed in Fig.~\ref{fig:timings}. 
-When examining the table generation time per point, we observe timings from a few milliseconds to
-3.5 minutes per point, with differences arising from the varying grid densities used in the input {\tt APPLgrid} files. 
-In terms of the grid size on disc, {\tt FK} tables are typically larger than their corresponding {\tt APPLgrids}, primarily as the {\tt FK} file format is encoding in plain text for compatibility whereas {\tt APPLgrids} are expressed in binary as {\tt ROOT} files. However when
-measuring the in-memory resident set size used by the both convolution procedures, the amount of memory required by {\tt FK} tables is systematically less than {\tt APPLgrid} for all processes considered here by at least 75\%.
+In Fig.~\ref{fig:performance} we examine the {\tt FK} table generation
+time with {\tt APFELgrid}, {\tt FK} table file size and memory usage
+of the {\tt FK} tables arising from the same source {\tt APPLgrids} as
+discussed in Fig.~\ref{fig:timings}.  When examining the table
+generation time per point, we observe timings from a few milliseconds
+to 3.5 minutes per point, with differences arising from the varying
+grid densities used in the input {\tt APPLgrid} files.  In terms of
+the grid size on disk, {\tt FK} tables are typically larger than their
+corresponding {\tt APPLgrids}, primarily as the {\tt FK} file format
+is encoding in plain text for compatibility whereas {\tt APPLgrids}
+are expressed in binary as {\tt ROOT} files. However when measuring
+the in-memory resident set size used by the both convolution
+procedures, the amount of memory required by {\tt FK} tables is
+systematically less than {\tt APPLgrid} for all processes considered
+here by at least 75\%.
 
 %In conclusion, the great performance benefits obtained with {\tt
 %APFELgrid} endorse the importance of this tool not only in PDF fits
@@ -510,7 +554,7 @@ measuring the in-memory resident set size used by the both convolution procedure
   \centering                                      
   \includegraphics[scale=0.6]{plots/t0b}
 \caption{\small {\tt APFELgrid} generation time per point and
-  comparison to {\tt APPLgrid} for grid size and resident set size
+  comparison to {\tt APPLgrid} for grid size on disk and resident set size
   (RSS).}
 \label{fig:performance}
 \end{figure}
@@ -521,33 +565,37 @@ measuring the in-memory resident set size used by the both convolution procedure
 In this work we have demonstrated that by employing the so-called {\tt
   FastKernel} method, it is possible to convert an {\tt APPLgrid}
 weight table into a derived format, referred to as {\tt FK} table,
-which includes PDF and $\alpha_s$ evolution. This procedure has been 
-implemented in the {\tt APFELgrid} package, supplied as a set of {\tt C++} routines designed to
-supplement the PDF evolution library {\tt APFEL} with {\tt FK} table generation
-capabilities. 
+which includes PDF and $\alpha_s$ evolution. This procedure has been
+implemented in the {\tt APFELgrid} package, supplied as a set of {\tt
+  C++} routines designed to supplement the PDF evolution library {\tt
+  APFEL} with {\tt FK} table generation capabilities.
 %The plugin has a very light interface for performing the {\tt FK} combination,
 %  and relies on the native {\tt APFEL} API for setting the parameters of the PDF evolution,
 %  including the structure of the initial scale $x$ grid.
-The {\tt APFELgrid} package allows one to obtain a 
-computationally efficient expression for the calculation of hadronic
-cross sections, in terms of only the initial-scale PDFs and summing
-only over the initial scale interpolating $x$-grid and the incoming parton
+The {\tt APFELgrid} package allows one to obtain a computationally
+efficient expression for the calculation of hadronic cross sections,
+in terms of only the initial-scale PDFs and summing only over the
+initial scale interpolating $x$-grid and the incoming parton
 flavors. Additionally the simple structure of the resulting
 convolution makes {\tt FK} tables particularly suitable to make
-efficient use of computational tools such as {\tt
-  SIMD} and {\tt OpenMP}.
+efficient use of computational tools such as {\tt SIMD} and {\tt
+  OpenMP}.
 
-We have shown that in several practical examples the numerical evaluation of an {\tt FK}
-product is much faster than the corresponding {\tt APPLgrid} product, even in the case where
-neither SIMD or multi-threading are applied. {\tt FK} tables are supplied in a simple plain-text 
-format in order to simplify the construction of user interfaces, and therefore typically are often larger 
-than the corresponding {\tt APFELgrid} file. However we have shown that the in-memory resident set size occupied by {\tt
-  FK} tables is typically smaller than that requred by {\tt APPLgrid} by at least 75\%.
+We have shown that in several practical examples the numerical
+evaluation of an {\tt FK} product is much faster than the
+corresponding {\tt APPLgrid} product, even in the case where neither
+SIMD or multi-threading are applied. {\tt FK} tables are supplied in a
+simple plain-text format in order to simplify the construction of user
+interfaces, and therefore typically are often larger than the
+corresponding {\tt APPLgrid} file. However we have shown that the
+in-memory resident set size occupied by {\tt FK} tables is typically
+smaller than that required by {\tt APPLgrid} by at least 75\%.
 
-The substantial speed improvement of {\tt FK} tables with respect to {\tt APPLgrid} in
-association with the reduction in memory footprint, makes
-the {\tt APFELgrid} code a valuable tool for modern PDF fits including large collider datasets and thus
-rely heavily upon fast calculations. 
+The substantial speed improvement of {\tt FK} tables with respect to
+{\tt APPLgrid} in association with the reduction in memory footprint,
+makes the {\tt APFELgrid} code a valuable tool for modern PDF fits
+including large collider datasets and thus rely heavily upon fast
+calculations.
 
 
 %We stress that {\tt APFELgrid} is not
