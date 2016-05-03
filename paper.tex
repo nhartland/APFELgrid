@@ -445,16 +445,6 @@ While these features provide significant performance enhancements, the {\tt FK }
 such as {\tt APPLgrid}. The pre-computation of the PDF evolution necessarily means that all theory parameters such as perturbative order, strong coupling and factorization/renormalization scales are inextricably embedded in each {\tt FK} table. In order to perform PDF fits including variations of these parameters, multiple {\tt FK } tables must be computed, each with different theory settings. While performing such a re-calculation directly from Monte Carlo codes
 would be exceptionally time consuming, the data representation in {\tt APPLgrid} files allows for an efficient combination with varying theory parameters.
 
-%\section{The {\tt APFELgrid} package}
-% **** Not sure if this sort of section would be neccesary ***
-%The {\tt APFELgrid} plugin generates {\tt FK} tables of the form
-%expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt
-%  APPLgrid} files. It is supplied as a set of {\tt C++} routines designed to
-%  supplement the PDF evolution library {\tt APFEL} with {\tt FK} table generation
-%  capabilities. The plugin has a very light interface for performing the {\tt FK} combination,
-%  and relies on the native {\tt APFEL} API for setting the parameters of the PDF evolution,
-%  including the structure of the initial scale $x$ grid.
-%*** Would now discuss e.g SIMD implementation etc in advance of looking at the results in next section ***
 \section{Performance benchmarks}
 \label{sec:benchmark}
 
@@ -528,49 +518,50 @@ measuring the in-memory resident set size used by the both convolution procedure
 
 \section{Conclusion}\label{sec:conclusion}
 
-In this work we have presented {\tt APFELgrid}, an efficient
-convolution interface to hadronic observables for fits of parton
-densities. We have demonstrated that employing the so-called {\tt
+In this work we have demonstrated that by employing the so-called {\tt
   FastKernel} method, it is possible to convert an {\tt APPLgrid}
-weight table into a derived format, referred to as {\tt FKtable},
-which includes PDF and $\alpha_s$ evolution as provided by {\tt
-  APFEL}.  Such a procedure allows one to obtain a very
-computationally-efficient expression for the calculation of hadronic
+weight table into a derived format, referred to as {\tt FK} table,
+which includes PDF and $\alpha_s$ evolution. This procedure has been 
+implemented in the {\tt APFELgrid} package, supplied as a set of {\tt C++} routines designed to
+supplement the PDF evolution library {\tt APFEL} with {\tt FK} table generation
+capabilities. 
+%The plugin has a very light interface for performing the {\tt FK} combination,
+%  and relies on the native {\tt APFEL} API for setting the parameters of the PDF evolution,
+%  including the structure of the initial scale $x$ grid.
+The {\tt APFELgrid} package allows one to obtain a 
+computationally efficient expression for the calculation of hadronic
 cross sections, in terms of only the initial-scale PDFs and summing
-only over the initial scale interpolating grid and the incoming parton
-flavors. In addition, the simple structure of the resulting
-convolution makes {\tt FKtables} particularly suitable to make
-efficient use of acceleration and parallelisation techniques like {\tt
+only over the initial scale interpolating $x$-grid and the incoming parton
+flavors. Additionally the simple structure of the resulting
+convolution makes {\tt FK} tables particularly suitable to make
+efficient use of computational tools such as {\tt
   SIMD} and {\tt OpenMP}.
 
-We have shown that the numerical convolution of an {\tt APFELgrid}
-tables is typically much faster than the corresponding {\tt
-  APPLgrid}. In particular, the {\tt FastKernel} method provides a
-great performance improvement with respect to {\tt APPLgrid} which is
-further enhanced by the employment of any of the acceleration
-techniques available in {\tt APFELgrid}. Finally, while the size of an
-{\tt FKtable} is often larger than the corresponding {\tt APFELgrid}
-file, we have shown that the resident set size memory required by {\tt
-  APFELgrid} is typically smaller than {\tt APPLgrid} by at least
-75\%.
+We have shown that in several practical examples the numerical evaluation of an {\tt FK}
+product is much faster than the corresponding {\tt APPLgrid} product, even in the case where
+neither SIMD or multi-threading are applied. {\tt FK} tables are supplied in a simple plain-text 
+format in order to simplify the construction of user interfaces, and therefore typically are often larger 
+than the corresponding {\tt APFELgrid} file. However we have shown that the in-memory resident set size occupied by {\tt
+  FK} tables is typically smaller than that requred by {\tt APPLgrid} by at least 75\%.
 
-The substantial speed improvement with respect to {\tt APPLgrid} in
-association with the reduction of the resident set size memory, makes
-the {\tt APFELgrid} code a valuable tool for modern PDF fits which
-usually incluse thousands of hadronic data points and that thus
-heavily rely on fast interfaces. We stress that {\tt APFELgrid} is not
-a replacement for {\tt APPLgrid}, on which it depends, but it is
-rather a specialised tool conceived to ease the inclusion of hadronic
-data into PDF fits. In fact, the price of a better performance is the
-fact that, by themselves, {\tt FKtables} cannot perform any parameter
-variation other than that of PDFs. For example, variations of
-$\alpha_s$ can be performed only by re-computing the {\tt FKtables}.
+The substantial speed improvement of {\tt FK} tables with respect to {\tt APPLgrid} in
+association with the reduction in memory footprint, makes
+the {\tt APFELgrid} code a valuable tool for modern PDF fits including large collider datasets and thus
+rely heavily upon fast calculations. 
 
-The {\tt APFELgrid} code is publicly available from the webpage:
+
+%We stress that {\tt APFELgrid} is not
+%a replacement for {\tt APPLgrid}, on which it depends, but it is
+%rather a specialised tool conceived to ease the inclusion of hadronic
+%data into PDF fits. In fact, the price of a better performance is the
+%fact that, by themselves, {\tt FKtables} cannot perform any parameter
+%variation other than that of PDFs. For example, variations of
+%$\alpha_s$ can be performed only by re-computing the {\tt FKtables}.
+
+The {\tt APFELgrid} package and associated documentation are publicly available from the webpage:
 \begin{center}
 \url{https://github.com/nhartland/APFELgrid}
 \end{center}
-where intructions to install and run codes are also provided.
 
 \section*{Acknowledgements}
 
