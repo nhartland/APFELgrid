@@ -213,7 +213,7 @@ QCD; parton distribution functions; fast predictions.
 
 \clearpage
 
-\tableofcontents
+%\tableofcontents
 
 %% main text
 \section{Introduction}\label{sec:intro}
@@ -437,7 +437,7 @@ calculation of observables at hadron colliders.
 Some discussion here of the expected performance
 differences. Including precomputed sums over scale, perturbative
 order, no need to perform PDF evolution on the fly, smaller initial
-scale PDF basis, simple convolution structure that can be accellerated
+scale PDF basis, simple convolution structure that can be accelerated
 with SIMD/OpenMP.  Explain reduced flexibility w.r.t $\alpha_S$
 variations and scales, discuss increased storage space requirement but
 also reduced memory footprint.  Might want to mention possibility for
@@ -450,10 +450,9 @@ The {\tt APFELgrid} plugin generates {\tt FK} tables of the form
 expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt
   APPLgrid} files. In this section we shall examine the performance
 differences between the two expressions for cross-section prediction
-Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt
-  FK}).
+Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt FK}).
 %
-For a comprehensive benchmark, we consider here a wide range of
+To provide a comprehensive benchmark, we consider here a wide range of
 processes including LHC and Tevatron electroweak vector boson
 production
 measurements~\cite{Aaij:2012mda,Aaij:2012vn,Chatrchyan:2013mza,Chatrchyan:2013uja,Chatrchyan:2012xt,Aad:2013iua,Aad:2011fp,Aad:2011dm,Aaltonen:2010zza},
@@ -462,40 +461,38 @@ cross-sections~\cite{ATLAS:2012aa,ATLAS:2011xha,TheATLAScollaboration:2013dja,Ch
 double-differential Drell-Yan
 cross-sections~\cite{Chatrchyan:2013tia,CMS:2014jea} and inclusive jet
 data~\cite{Chatrchyan:2012bja,Aad:2011fc,Aad:2013lpa,Abazov:2007jy}. Predictions
-are provided for a wide range of kinematics, for a total of 52 source
-{\tt APPLgrid} files roughly corresponding to the full collider
-dataset of the forthcoming NNPDF3.1 PDF determination.
+are performed over a wide range of kinematics, for a total of 52 source
+{\tt APPLgrid} files corresponding to the majority of available LHC and Tevatron datasets of applicability to PDF determination.
+While the source {\tt APPLgrid} files have varying grid densities in $x$ and $Q^2$, for the purposes of comparison the corresponding {\tt FK} tables are produced
+consistently with 30 points in $x$, and at an initial scale below the charm threshold, therefore with seven active partonic species.
 
-In Fig.~\ref{fig:timings} we compare the convolution time per point
-between {\tt APFELgrid} and {\tt APPLgrid} for all the 52
-processes. We show timings for the {\tt APFELgrid} library in four
-different configurations: AVX-OpenMP 2x (2 CPUs), AVX SSE3, and
-standard double precision dot product convolution. When comparing the
-results we observe a great performance improvement for convolution
-time per point when using {\tt APFELgrid}. In particular, when
-comparing {\tt APFELgrid} AVX to {\tt APPLgrid} timings we obtain a
-minimum of 10x improvement for electroweak vector boson production and
-a maximum of 2000x for inclusive jet data. These results confirm the
-great usefulness of {\tt APFELgrid} in terms of performance for fits
-of PDFs.
+In Fig.~\ref{fig:timings} we compare the average time taken per datapoint
+for the {\tt FK} and {\tt APPLgrid} calculations, for all of the 52
+tables. We show timings for the {\tt FK} calculation in four
+different configurations: AVX-OpenMP 2x (2 CPU cores), AVX, SSE3 and
+standard double precision dot product. Due to the inherent structural differences between the {\tt FK} and {\tt APPLgrid} procedures,
+results from the {\tt FK} calculation are systematically faster than those from {\tt APPLgrids}.
+In particular, when comparing {\tt FK} AVX to {\tt APPLgrid} timings we obtain minimally a factor
+of ten improvement in speed for electroweak vector boson production and
+a maximum factor of 2000 improvement in predictions for inclusive jet data. Across all processes
+and kinematic regions we observe significant performance improvements from using the {\tt FK} calculation
+even in the maximally compatible, non-SIMD case.
 
-In Fig.~\ref{fig:performance} we provide information about the {\tt
-  APFELgrid} table generation, grid size and memory usage. In terms of
-generation time per point, we observe timings from few milliseconds to
-3.5 minutes per point. Such difference is almost due to the density of
-weights contained in the input {\tt APPLgrid} which requires a larger
-number of combination operations. When considering the grid size we
-confirm that in several processes the {\tt APPLgrid} files are smaller
-than {\tt APFELgrid} ones as expected. This feature is justified by
-the lack of compression of {\tt APFELgrid} files. Finally, when
-measuring the resident set size memory used by the convolution
-programs, the amount of memory required by {\tt APFELgrid} is smaller
-than {\tt APPLgrid} for all processes considered here by at least
-75\%.
+While sheer computational speed is typically the primary consideration when computing observables
+in a PDF fit, other factors such as table size in the filesystem and memory, along with the computational cost of
+pre-computing {\tt FK} tables must be considered. Indeed, the computation of the {\tt FK} table in Eqn.~\ref{eq:FKTable}
+requires a great deal of operations which can be time consuming, particuarly in the case of source {\tt APPLgrids} with very high
+interpolation precision.
 
-In conclusion, the great performance benefits obtained with {\tt
-  APFELgrid} endorse the importance of this tool not only in PDF fits
-but also in any application requiring a large number of convolutions.
+In Fig.~\ref{fig:performance} we examine the {\tt FK} table generation time with {\tt APFELgrid}, {\tt FK} table file size and memory usage of the {\tt FK} tables arising from the same source {\tt APPLgrids} as discussed in Fig.~\ref{fig:timings}. 
+When examining the table generation time per point, we observe timings from a few milliseconds to
+3.5 minutes per point, with differences arising from the varying grid densities used in the input {\tt APPLgrid} files. 
+In terms of the grid size on disc, {\tt FK} tables are typically larger than their corresponding {\tt APPLgrids}, primarily as the {\tt FK} file format is encoding in plain text for compatibility whereas {\tt APPLgrids} are expressed in binary as {\tt ROOT} files. However when
+measuring the in-memory resident set size used by the both convolution procedures, the amount of memory required by {\tt FK} tables is systematically less than {\tt APPLgrid} for all processes considered here by at least 75\%.
+
+%In conclusion, the great performance benefits obtained with {\tt
+%APFELgrid} endorse the importance of this tool not only in PDF fits
+%but also in any application requiring a large number of convolutions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}
