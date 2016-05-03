@@ -427,28 +427,38 @@ where the object:
   \widetilde{W}_{kl,\delta\gamma} = \sum_p^{N_\alpha} \sum_{s}^{N_{\mathrm{sub}}} \sum_{\alpha,\beta} \sum_{\tau}
 \alpha_s^{p+p_{\rm LO}}(Q^2_\tau)  W_{\alpha\beta,\tau}^{(p)(s)} \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta}
 \end{equation}
-is referred to here as an {\tt FKtable}, and combines the information
+is referred to here as an {\tt FK} table, and combines the information
 stored in {\tt APPLgrid}-style interpolated weight grids with
-analogously interpolated DGLAP evolution operators. Such a combination
+analogously interpolated DGLAP evolution operators. This combination
 enables for a maximally computationally-efficient expression for the
-calculation of observables at hadron colliders.
+calculation of observables at hadron colliders under PDF variation.
 
-\subsection{Properties of {\tt FK} tables}
-Some discussion here of the expected performance
-differences. Including precomputed sums over scale, perturbative
-order, no need to perform PDF evolution on the fly, smaller initial
-scale PDF basis, simple convolution structure that can be accelerated
-with SIMD/OpenMP.  Explain reduced flexibility w.r.t $\alpha_S$
-variations and scales, discuss increased storage space requirement but
-also reduced memory footprint.  Might want to mention possibility for
-generating 'fast' grids as the interpolation accuracy is decoupled.
+\subsection{Features and limitations of {\tt FK} tables}
+The {\tt FK} product of Eqn.~\ref{eq:FK} differs with respect to the product in Eqn.~\ref{eq:applconv} in several notable ways. Firstly 
+the typical {\tt APPLgrid} or {\tt FastNLO} products require PDFs at a general scale $Q^2$, which implies performing PDF evolution e.g Eqn.~\ref{eq:fastPDFfinal_recalled} for every variation of the PDFs at the input scale during the fit. However in the {\tt FK} convolution this evolution
+is pre-cached at the stage of {\tt FK} table generation, requiring only initial-scale PDFs as an input at fitting time. This pre-caching of the evolution
+also removes the need for performing the sums over hard scale and perturbative order during the fit, further reducing the number of operations required.
+The {\tt FK} convolution also benefits from the typically reduced number of active partonic modes at the fitting scale, with the sum over flavours in Eqn.~\ref{eq:FK} being limited to those directly used in the fit. Having reduced the calculation to such a simple form, it is also possible to straightforwardly
+apply standard and widely-available computational tools such as multi-threading through e.g OpenMP or Single Instruction Multiple Data (SIMD) operations e.g SSE or AVX to further reduce computational cost.
 
+While these features provide significant performance enhancements, the {\tt FK } table format is not suitable as a complete replacement for tools
+such as {\tt APPLgrid}. The pre-computation of the PDF evolution necessarily means that all theory parameters such as perturbative order, strong coupling and factorization/renormalization scales are inextricably embedded in each {\tt FK} table. In order to perform PDF fits including variations of these parameters, multiple {\tt FK } tables must be computed, each with different theory settings. While performing such a re-calculation directly from Monte Carlo codes
+would be exceptionally time consuming, the data representation in {\tt APPLgrid} files allows for an efficient combination with varying theory parameters.
+
+%\section{The {\tt APFELgrid} package}
+% **** Not sure if this sort of section would be neccesary ***
+%The {\tt APFELgrid} plugin generates {\tt FK} tables of the form
+%expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt
+%  APPLgrid} files. It is supplied as a set of {\tt C++} routines designed to
+%  supplement the PDF evolution library {\tt APFEL} with {\tt FK} table generation
+%  capabilities. The plugin has a very light interface for performing the {\tt FK} combination,
+%  and relies on the native {\tt APFEL} API for setting the parameters of the PDF evolution,
+%  including the structure of the initial scale $x$ grid.
+%*** Would now discuss e.g SIMD implementation etc in advance of looking at the results in next section ***
 \section{Performance benchmarks}
 \label{sec:benchmark}
 
-The {\tt APFELgrid} plugin generates {\tt FK} tables of the form
-expressed in Eq.~(\ref{eq:FKTable}) from weight grids supplied by {\tt
-  APPLgrid} files. In this section we shall examine the performance
+In this section we shall examine the performance
 differences between the two expressions for cross-section prediction
 Eq.~(\ref{eq:applconv}) ({\tt APPLgrid}) and Eq.~(\ref{eq:FK}) ({\tt FK}).
 %
@@ -530,13 +540,13 @@ cross sections, in terms of only the initial-scale PDFs and summing
 only over the initial scale interpolating grid and the incoming parton
 flavors. In addition, the simple structure of the resulting
 convolution makes {\tt FKtables} particularly suitable to make
-efficient use of acceleration and parallelization techniques like {\tt
-  SIMD} and {\tt OpenMD}.
+efficient use of acceleration and parallelisation techniques like {\tt
+  SIMD} and {\tt OpenMP}.
 
 We have shown that the numerical convolution of an {\tt APFELgrid}
 tables is typically much faster than the corresponding {\tt
   APPLgrid}. In particular, the {\tt FastKernel} method provides a
-great perfomance improvement with respect to {\tt APPLgrid} which is
+great performance improvement with respect to {\tt APPLgrid} which is
 further enhanced by the employment of any of the acceleration
 techniques available in {\tt APFELgrid}. Finally, while the size of an
 {\tt FKtable} is often larger than the corresponding {\tt APFELgrid}
@@ -544,13 +554,13 @@ file, we have shown that the resident set size memory required by {\tt
   APFELgrid} is typically smaller than {\tt APPLgrid} by at least
 75\%.
 
-The subtantial speed improvement with respect to {\tt APPLgrid} in
+The substantial speed improvement with respect to {\tt APPLgrid} in
 association with the reduction of the resident set size memory, makes
 the {\tt APFELgrid} code a valuable tool for modern PDF fits which
 usually incluse thousands of hadronic data points and that thus
 heavily rely on fast interfaces. We stress that {\tt APFELgrid} is not
 a replacement for {\tt APPLgrid}, on which it depends, but it is
-rather a specialized tool conceived to ease the inclusion of hadronic
+rather a specialised tool conceived to ease the inclusion of hadronic
 data into PDF fits. In fact, the price of a better performance is the
 fact that, by themselves, {\tt FKtables} cannot perform any parameter
 variation other than that of PDFs. For example, variations of
