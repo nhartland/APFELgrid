@@ -342,7 +342,7 @@ subprocess PDFs only through a simple product:
   \alpha_s^{p+p_{\rm LO}}(Q^2_\tau)W_{\alpha\beta,\tau}^{(p)(s)} \, F_{\alpha\beta,\tau}^{(s)}\,,
 \end{equation}
 where
-\begin{equation}
+\begin{equation} \label{eq:applgrid}
   W_{\alpha\beta,\tau}^{(p)(s)} = \mathcal{I}_\tau(Q^2)\int dx_1\,dx_2\,
   \hat{\sigma}^{(p)(s)}\,\mathcal{I}_\alpha(x_1)
   \,\mathcal{I}_\beta(x_2)\,,
@@ -355,32 +355,22 @@ inside a fit than the direct evaluation of the double convolution.
 
 \subsection{The FastKernel method}
 
-A number of tools, $e.g.$ {\tt
+A number of tools ($e.g.$ {\tt
   APFEL},
-{\tt HOPPET}~\cite{Salam:2008qg} and {\tt QCDNUM}~\cite{Botje:2010ay},
+{\tt HOPPET}~\cite{Salam:2008qg} and {\tt QCDNUM}~\cite{Botje:2010ay}) 
 are available which perform PDF evolution via an analogous
-procedure. {\tt APFEL} in particular, is able to provide the so-called
-\textit{evolution operator}. The evolution operator, is computed
-assuming that the DGLAP evolution can be encoded in a single operator
-whose action on the intial scale PDFs proceduces the final scale
-PDFs. Taking $Q_0$ as an initial scale and $Q_\tau$ as a final scale,
-on the $x$-space grid one can write:
+interpolation procedure. In such a way PDFs at a general scale $Q_\tau$ may be
+expressed as a product of PDFs at some initial, fitting scale $Q_0$ and an
+\textit{evolution operator} obtained by the solution of the DGLAP equation.
 \begin{equation}\label{eq:fastPDFfinal_recalled}
   f_i(x_{\alpha},Q^2_\tau) = \sum_{k}
   \sum_\beta A^\tau_{\alpha\beta, ik}\;
   f_k(x_\beta,Q^2_0)\,, 
 \end{equation}
-where the operator $A$ is the solution of the DGLAP evolution equation
-with baundary condition:
-\begin{equation}
-A^\tau_{\alpha\beta, ik} =
-\delta_{\alpha\beta}\delta_{ik}\qquad\mbox{for}\qquad Q_\tau = Q_0\,.
-\end{equation}
-
-Given the evolution operator defined in
-Eq.~(\ref{eq:fastPDFfinal_recalled}), we may replace the
+where latin indices run over PDF flavour, greek indices run over points in an initial-scale interpolating $x$-grid and
+the evolution operator $A$ may be accessed directly in the {\tt APFEL} package. Given this operator, we may replace the
 (general-scale) PDFs used in the subprocess parton density
-Eq.~(\ref{eq:APPLsubproc}) with their equivalent expressions like so:
+Eq.~(\ref{eq:APPLsubproc}) with their equivalent expressions evaluated at the fitting scale as
 \begin{equation}\label{eq:FK1}
 \begin{array}{rcl}
 F^{(s)}_{\alpha\beta,\tau} &=&  \displaystyle \sum_{i,j} \sum_{k,l}
@@ -395,16 +385,16 @@ F^{(s)}_{\alpha\beta,\tau} &=&  \displaystyle \sum_{i,j} \sum_{k,l}
 f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0)\,,
 \end{array}
 \end{equation}
-where the object:
+with the object
 \begin{equation}
   \widetilde{C}^{(s),\tau}_{kl,\alpha\beta\gamma\delta} =
   \sum_{i,j} C^{(s)}_{ij} A^\tau_{\alpha\delta ik}
   A^\tau_{\beta\gamma jl}\,,
 \end{equation}
-combines the operations of subprocess density construction and PDF
-evolution. Going further it is possible to then use the expression for
+combining the operations of subprocess density construction and PDF
+evolution. Going further and using the expression for
 subprocess parton densities in Eq.~(\ref{eq:FK1}) in the full
-cross section calculation:
+cross section calculation we obtain
 \begin{equation}
 \sigma_{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma}\sum_p
 \sum_{s} \sum_{\alpha,\beta}
@@ -429,7 +419,7 @@ where the object:
 is referred to here as an {\tt FK} table, and combines the information
 stored in {\tt APPLgrid}-style interpolated weight grids with
 analogously interpolated DGLAP evolution operators. This combination
-enables for a maximally computationally-efficient expression for the
+enables for a maximally efficient expression for the
 calculation of observables at hadron colliders under PDF variation.
 
 \subsection{Features and limitations of {\tt FK} tables}
