@@ -24,6 +24,7 @@
 
 @APFELGRID_HAVE_AVX@
 @APFELGRID_HAVE_SSE3@
+@APFELGRID_HAVE_OMP@
 
 #include <string>
 #include <vector>
@@ -951,7 +952,9 @@ namespace NNPDF
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
-    //#pragma omp parallel for
+#if APFELGRID_HAVE_OMP == 1
+#pragma omp parallel for
+#endif
     for (int i = 0; i < fNData; i++)
       for (size_t n = 0; n < Npdf; n++)
       {
