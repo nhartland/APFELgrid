@@ -233,7 +233,7 @@ of the partonic hard cross sections in such a way that the standard numerical
 convolution with any set of PDFs can be reliably approximated by means of
 interpolation techniques.
 
-Such interpolation strategies are implementated in the {\tt
+Such interpolation strategies are implemented in the {\tt
   APPLgrid}~\cite{Carli:2010rw} and {\tt
   FastNLO}~\cite{Wobisch:2011ij} projects. For the computation of the
 hard cross sections, these packages rely on external codes to which
@@ -406,7 +406,7 @@ Performing some further contractions it is possible to obtain an
 extremely compact expression for the calculation of the cross section
 in question, in terms of only the initial-scale PDFs and summing only
 over the initial scale interpolating $x$-grid and the incoming parton
-flavors:
+flavours:
 \begin{equation}\label{eq:FK}
   \sigma _{pp\to X} = \sum_{k,l}\sum_{\delta,\gamma} 
   \widetilde{W}_{kl,\delta\gamma} \,f_k(x_\delta,Q^2_0) f_l(x_\gamma,Q^2_0),
@@ -437,7 +437,7 @@ This pre-caching of the evolution also removes the need to
  sum over hard scale and perturbative order during the
 fit, further reducing the number of operations required. As the {\tt FK}
 product acts directly at the fitting scale, it benefits from the typically reduced number of active
-partonic modes, with the sum over flavors in
+partonic modes, with the sum over flavours in
 Eq.~(\ref{eq:FK}) being limited to those directly parametrised in the
 fit. Having reduced the calculation to such a simple form, it is also
 straightforward to apply standard 
@@ -504,7 +504,7 @@ when com\-pu\-ting observables in a PDF fit, other factors such as
 table size in the filesystem and memory, along with the computational
 cost of pre-computing {\tt FK} tables must be considered. Indeed, the
 computation of the {\tt FK} table in Eq.~(\ref{eq:FKTable}) requires a
-great deal of operations which can be time consuming, particuarly in
+great deal of operations which can be time consuming, particularly in
 the case of source {\tt APPLgrid} files with very high interpolation
 precision.
 
@@ -566,7 +566,7 @@ The {\tt APFELgrid} package allows one to obtain a computationally
 efficient expression for the calculation of hadronic cross sections,
 in terms of only the initial-scale PDFs and summing only over the
 initial scale interpolating $x$-grid and the incoming parton
-flavors. The simple structure of the resulting
+flavours. The simple structure of the resulting
 product makes {\tt FK} tables particularly suitable for the
 efficient use of computational tools such as {\tt SIMD} and {\tt
   OpenMP}.
