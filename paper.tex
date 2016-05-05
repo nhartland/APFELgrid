@@ -216,8 +216,8 @@ QCD; parton distribution functions; fast predictions.
 %% main text
 \section{Introduction}\label{sec:intro}
 
-Measurements at the Large Hadron Collider (LHC) have a unique capacity to shed light upon the internal dynamics 
-of the proton and provide new constraints upon proton PDFs. However the inclusion of large collider datasets 
+Measurements at colliders such as the Tevatron and Large Hadron Collider (LHC) have a unique capacity to shed light upon the internal dynamics 
+of the proton and provide constraints upon proton PDFs~\cite{Rojo:2015acz}. However the inclusion of large hadron collider datasets 
 into PDF fits can provide a significant challenge due to the large computational footprint of performing accurate
 theoretical predictions over the many iterations required in a fitting procedure. In order to make the fullest use of current 
 and future LHC results, efficient strategies for the computation of these observables must therefore be employed. 
@@ -261,7 +261,7 @@ For this reason a high-performance tool tailored specifically to the requirement
 important.
 
 The {\tt FastKernel} method was developed to
-address this problem in the context of the NNPDF global analyses~\cite{Ball:2010de,Ball:2014uwa}. This method differs from the standard procedure
+address this problem in the context of the NNPDF global analyses~\cite{Ball:2014uwa}. This method differs from the standard procedure
 \`{a} la {\tt APPLgrid} or {\tt FastNLO} in that it maximises the
 amount of information that is precomputed prior to fitting so as to
 minimise the amount of operations required during the
@@ -480,7 +480,9 @@ While the source {\tt APPLgrid} files have varying grid densities in
 $x$ and $Q^2$, for the purposes of comparison the corresponding {\tt
   FK} tables are produced consistently with 30 points in $x$, and at
 an initial scale below the charm threshold, therefore with seven
-active partonic species.
+active partonic species. These settings are chosen so as to provide a realistic
+comparison, in a production environment the density and distribution of the
+$x$-grid may be adjusted to match interpolation requirement.
 
 In Fig.~\ref{fig:timings} we compare the average time taken per
 datapoint for the {\tt FK} and {\tt APPLgrid} calculations, for all of
