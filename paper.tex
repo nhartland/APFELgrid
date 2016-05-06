@@ -482,7 +482,9 @@ $x$ and $Q^2$, for the purposes of comparison the corresponding {\tt
 an initial scale below the charm threshold, therefore with seven
 active partonic species. These settings are chosen so as to provide a realistic
 comparison, in a production environment the density and distribution of the
-$x$-grid may be adjusted to match interpolation requirement.
+$x$-grid may be adjusted to match interpolation accuracy requirements.  For these comparisons the {\tt FK}
+table is stored as double-precision in memory for table generation and in
+single-precision for the purposes of computing the product and memory overheads.
 
 In Fig.~\ref{fig:timings} we compare the average time taken per
 datapoint for the {\tt FK} and {\tt APPLgrid} calculations, for all of
@@ -511,7 +513,7 @@ precision.
 In Fig.~\ref{fig:performance} we examine the {\tt FK} table generation
 time with {\tt APFELgrid}, {\tt FK} table file size and memory usage
 of the {\tt FK} tables arising from the same source {\tt APPLgrid}
-files as discussed in Fig.~\ref{fig:timings}.  When examining the
+files as discussed in Fig.~\ref{fig:timings}. When examining the
 table generation time per point, we observe timings from a few
 milliseconds to 3.5 minutes per point, with differences arising from
 the varying grid densities used in the input {\tt APPLgrid} files.  In
@@ -522,7 +524,8 @@ than their corresponding {\tt APPLgrid} files, primarily as the {\tt
 files. However when measuring the in-memory resident set size used by
 the two procedures, the amount of system memory used by {\tt
   FK} tables is systematically less than {\tt APPLgrid} files for all
-processes considered here by at least 75\%.
+processes considered here by at least 75\%. Note that this effect is
+in part due to the differing precisions of the default representations.
 
 %In conclusion, the great performance benefits obtained with {\tt
 %APFELgrid} endorse the importance of this tool not only in PDF fits
@@ -602,7 +605,8 @@ available from the webpage:
 \section*{Acknowledgements}
 
 The authors would like to thank members of the NNPDF Collaboration for their support and
-motivation for this work; particularly Juan Rojo, Luigi del Debbio and Alberto Guffanti. V.~B. and N.~H. are
+motivation for this work; particularly Juan Rojo, Luigi del Debbio and Alberto Guffanti. We would also like
+to thank Mark Sutton for helpful comments on the paper. V.~B. and N.~H. are
 supported by an European Research Council Starting Grant ``PDF4BSM''.
 S.~C. is supported by the HICCUP ERC Consolidator grant (614577).
 
