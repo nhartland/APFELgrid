@@ -29,9 +29,9 @@ custom interfaces to it should be simple.
 
 Requirements
 ------------
-+	**APFEL** 		[master](http://github.com/scarrazza/apfel)
++	**APFEL** 		[2.7.1](http://github.com/scarrazza/apfel)
 +	**LHAPDF** 		[6.X.X](http://lhapdf.hepforge.org)
-+	**APPLgrid** 	[1.4.70](http://applgrid.hepforge.org)
++	**APPLgrid** 		[1.4.70](http://applgrid.hepforge.org)
 
 Your APPLgrid installation must be modified such that all headers are installed
 (simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)

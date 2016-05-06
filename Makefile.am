@@ -23,3 +23,4 @@ example_conv_CPPFLAGS = $(AM_CPPFLAGS) -I ./src
 example_conv_LDFLAGS = $(CHECKLDFLAGS)
 
 TESTS= tests/fetchTestData.sh $(check_PROGRAMS) tests/clearTestData.sh
+EXTRA_DIST = src/APFELgrid/APFELgrid.h src/APFELgrid/transform.h tests/clearTestData.sh tests/fetchTestData.sh setup.sh
