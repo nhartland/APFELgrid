@@ -60,6 +60,12 @@ A few tests can be performed upon the package with
 
 which is automatically executed by the boostrap script.
 
+Examples
+--------
+For usage examples, see
++	**/tests/example_gen.cc** for an FK table generation example
++   **/tests/example_conv.cc** for an FK table convolution example
+
 Feedback
 --------
 
