@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT(APFELgrid, 0.Xb, nathan.hartland@physics.ox.ac.uk)
+AC_INIT(APFELgrid, 1.0, nathan.hartland@physics.ox.ac.uk)
 AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT()
