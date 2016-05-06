@@ -139,7 +139,7 @@
 
 \begin{abstract}
   We present a new software package designed to reduce the computational
-  burden of collider measurements in Parton Distribution Function (PDF)
+  burden of hadron collider measurements in Parton Distribution Function (PDF)
   fits. The {\tt APFELgrid} package converts interpolated weight
   tables provided by {\tt APPLgrid} files into a more efficient format
   for PDF fitting by the combination with PDF and
@@ -217,13 +217,13 @@ QCD; parton distribution functions; fast predictions.
 \section{Introduction}\label{sec:intro}
 
 Measurements at colliders such as the Tevatron and Large Hadron Collider (LHC) have a unique capacity to shed light upon the internal dynamics 
-of the proton and provide constraints upon proton PDFs~\cite{Rojo:2015acz}. However the inclusion of large hadron collider datasets 
-into PDF fits can provide a significant challenge due to the large computational footprint of performing accurate
+of the proton and provide constraints upon proton PDFs~\cite{Rojo:2015acz}. However including large hadron collider datasets 
+in PDF fits can provide a significant challenge due to the large computational footprint of performing accurate
 theoretical predictions over the many iterations required in a fitting procedure. In order to make the fullest use of current 
 and future LHC results, efficient strategies for the computation of these observables must therefore be employed. 
 
 The typical Monte Carlo software packages used to perform predictions for 
-hadron-collider observables cannot be easily deployed in a PDF fit due the processing time 
+hadron collider observables cannot be easily deployed in a PDF fit due the processing time 
 required to obtain accurate results (usually of the order of a few hours or more per data
 point). To overcome such limitations, the typical strategy
 adopted for fast cross section prediction relies on the precomputation
@@ -251,10 +251,10 @@ generators have been developed. The {\tt
 While these tools have proven to be invaluable in the extraction
 of parton densities, the volume of experimental data made available by
 LHC collaborations for use in PDF fits is already stretching the
-capabilities of the typical fitting technology. A typical
+capabilities of the typical fitting technology. A standard
 global PDF fit may now include thousands of hadronic data points for which
 predictions have to be computed thousands of times during the
-minimisation process. As a consequence performing these predictions
+minimisation process. As a consequence, performing these predictions
 using the standard interpolating tools, $i.e.$
 {\tt APPLgrid} and {\tt FastNLO}, starts to become prohibitively time-consuming.
 For this reason a high-performance tool tailored specifically to the requirements of PDF analysis becomes increasingly
@@ -358,7 +358,7 @@ A number of tools ($e.g.$ {\tt
 {\tt HOPPET}~\cite{Salam:2008qg} and {\tt QCDNUM}~\cite{Botje:2010ay}) 
 are available which perform PDF evolution via an analogous
 interpolation procedure. In such a way PDFs at a general scale $Q_\tau$ may be
-expressed as a product of PDFs at some initial, fitting scale $Q_0$ and an
+expressed as a product of PDFs at some initial fitting scale $Q_0$ and an
 \textit{evolution operator} obtained by the solution of the DGLAP equation.
 \begin{equation}\label{eq:fastPDFfinal_recalled}
   f_i(x_{\alpha},Q^2_\tau) = \sum_{k}
@@ -440,7 +440,7 @@ Eq.~(\ref{eq:FK}) being limited to those directly parametrised in the
 fit. Having reduced the calculation to such a simple form, it is also
 straightforward to apply standard 
 computational tools such as multi-threading through e.g OpenMP or
-Single Instruction Multiple Data (SIMD) operations e.g SSE or AVX to
+Single Instruction Multiple Data (SIMD) operations such as SSE or AVX to
 further reduce computational expense. 
 
 While these features provide significant performance enhancements, the
@@ -475,7 +475,7 @@ cross sections~\cite{Chatrchyan:2013tia,CMS:2014jea} and inclusive jet
 data~\cite{Chatrchyan:2012bja,Aad:2011fc,Aad:2013lpa,Abazov:2007jy}. Predictions
 are performed over a wide range of kinematics, for a total of 52
 source {\tt APPLgrid} files corresponding to the majority of available
-LHC and Tevatron datasets of applicability to PDF determination.
+LHC and Tevatron datasets applicable to PDF determination.
 While the source {\tt APPLgrid} files have varying grid densities in
 $x$ and $Q^2$, for the purposes of comparison the corresponding {\tt
   FK} tables are produced consistently with 30 points in $x$, and at
@@ -484,7 +484,7 @@ active partonic species. These settings are chosen so as to provide a realistic
 comparison, in a production environment the density and distribution of the
 $x$-grid may be adjusted to match interpolation accuracy requirements.  For these comparisons the {\tt FK}
 table is stored as double-precision in memory for table generation and in
-single-precision for the purposes of computing the product and memory overheads.
+single-precision for the purposes of computing the {\tt FK} product.
 
 In Fig.~\ref{fig:timings} we compare the average time taken per
 datapoint for the {\tt FK} and {\tt APPLgrid} calculations, for all of
