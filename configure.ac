@@ -9,8 +9,9 @@ LT_INIT()
 
 AC_CONFIG_SRCDIR([src/APFELgrid.cc])
 AC_CONFIG_HEADERS([src/APFELgrid/config.h])
-AC_CONFIG_FILES([Makefile src/APFELgrid/fastkernel.h])
-AM_INIT_AUTOMAKE([serial-tests subdir-objects])
+AC_CONFIG_FILES([Makefile src/APFELgrid/fastkernel.h apfelgrid-config])
+#AM_INIT_AUTOMAKE([serial-tests subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_SUBST(APFELGRID_HAVE_SSE3, ["#define APFELGRID_HAVE_SSE3 0"])
 AC_SUBST(APFELGRID_HAVE_AVX, ["#define APFELGRID_HAVE_AVX 0"])

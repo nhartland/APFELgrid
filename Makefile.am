@@ -24,3 +24,9 @@ example_conv_LDFLAGS = $(CHECKLDFLAGS)
 
 TESTS= tests/fetchTestData.sh $(check_PROGRAMS) tests/clearTestData.sh
 EXTRA_DIST = src/APFELgrid/APFELgrid.h src/APFELgrid/transform.h tests/clearTestData.sh tests/fetchTestData.sh setup.sh
+
+EXTRA_DIST += apfelgrid-config.in
+bin_SCRIPTS = apfelgrid-config
+
+PKGincludedir = $(includedir)/APFELgrid
+PKGinclude_HEADERS = src/APFELgrid/APFELgrid.h src/APFELgrid/fastkernel.h src/APFELgrid/transform.h
