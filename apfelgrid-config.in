@@ -31,7 +31,7 @@ tmp=$( echo "$*" | egrep -- '--\<incdir\>')
 test -n "$tmp" && OUT="$OUT @includedir@"
 
 tmp=$( echo "$*" | egrep -- '--\<cppflags\>')
-test -n "$tmp" && OUT="$OUT -I@includedir@"
+test -n "$tmp" && OUT="$OUT @SIMD_FLAGS@ -I@includedir@"
 
 tmp=$( echo "$*" | egrep -- '--\<cxxflags\>')
 test -n "$tmp" && OUT="$OUT @SIMD_FLAGS@ -I@includedir@"
