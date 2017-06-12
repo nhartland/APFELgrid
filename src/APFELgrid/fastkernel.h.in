@@ -948,8 +948,11 @@ namespace NNPDF
   {
     // Fetch PDF array
     T *pdf = 0;
-    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, sizeof(T)*fDSz*Npdf);
+
+    const int Psz = sizeof(T)*fDSz*Npdf;
+    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, Psz);
     if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + ToString(err));
+    std::memset(pdf,0,Psz);
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
@@ -975,26 +978,32 @@ namespace NNPDF
     // prepare PDF representation
     int index = 0;
     const int NFL = 14;
-    T* EVLN = new T[fNx*NFL];
+    T* EVLN = new T[fNx*NFL]();
     
     for (size_t n = 0; n < NPDF; n++)
     {
       for (int i = 0; i < fNx; i++)
         inpdf(fXgrid[i], sqrt(fQ20), n, &EVLN[i*NFL]);
       
-      for (int fl=0; fl<fNonZero; fl++)
+      if (fHadronic)
       {
-        const int fl1 = fFlmap[2*fl];
-        const int fl2 = fFlmap[2*fl+1];
-        
-        for (int i = 0; i < fNx; i++)
-          for (int j = 0; j < fNx; j++)
-            pdf[index++] = EVLN[i*NFL+fl1]*EVLN[j*NFL+fl2];
+        for (int fl=0; fl<fNonZero; fl++)
+        {
+          const int fl1 = fFlmap[2*fl];
+          const int fl2 = fFlmap[2*fl+1];
+          const int idx = n*fDSz + fl*fTx;
+
+          for (int i = 0; i < fNx; i++)
+            for (int j = 0; j < fNx; j++)
+              pdf[ idx + i*fNx + j ] = EVLN[i*NFL+fl1]*EVLN[j*NFL+fl2];
+        }
       }
-      
-      for (int i=0; i<fPad; i++) // Add padding PDF
-        pdf[index++] = 0;
-      
+      else
+      {
+        for (int fl=0; fl<fNonZero; fl++)
+          for (int i = 0; i < fNx; i++)
+            pdf[ n*fDSz + fl*fTx + i ] = EVLN[i*NFL+fFlmap[fl]];
+      }    
     }
     
     delete[] EVLN;
