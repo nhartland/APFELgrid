@@ -39,6 +39,7 @@
 #include <cmath>
 #include <map>
 #include <stdexcept>
+#include <string.h>
 
 namespace NNPDF
 {
@@ -952,7 +953,7 @@ namespace NNPDF
     const int Psz = sizeof(T)*fDSz*Npdf;
     int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, Psz);
     if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + ToString(err));
-    std::memset(pdf,0,Psz);
+    memset_s(pdf,0,Psz);
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
