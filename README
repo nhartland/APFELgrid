@@ -66,6 +66,13 @@ For usage examples, see
 +	**/tests/example_gen.cc** for an FK table generation example
 +   **/tests/example_conv.cc** for an FK table convolution example
 
+Documentation
+-------------
+
+Documentation is generated with [docco](https://github.com/jashkenas/docco).
+    ./docco_generate.sh
+
+
 Feedback
 --------
 
