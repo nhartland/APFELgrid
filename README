@@ -71,7 +71,7 @@ Documentation
 
 Documentation is generated with [docco](https://github.com/jashkenas/docco).
    
-   ./docco_generate.sh
+    ./docco_generate.sh
 
 
 Feedback
