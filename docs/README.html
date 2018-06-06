@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>APFELgrid</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="apfelgrid">APFELgrid</h1>
+
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="README.html">
+                    ./README.md
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="tests/example_conv.html">
+                    ./tests/example_conv.cc
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="tests/example_gen.html">
+                    ./tests/example_gen.cc
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>The APFELgrid plugin is a tool designed to accelerate the computation of physical observables
+at hadron colliders, by means of combining the interpolated weight-grids provided by the APPLgrid
+project with the evolution of parton densities provided by APFEL. The tool is aimed at PDF fitting groups, 
+as it allows for the extremely rapid recalculation of cross-sections when varying the input PDF. </p>
+<p>APFELgrid generates FastKernel (or FK) tables which reduce the computation of NLO pQCD predictions 
+to a particuarly compact form in terms of PDFs at a single initial scale.</p>
+<p><img src="fk_convolution.png" alt="FastKernel convolution"></p>
+<p>These tables are used for fits in the <a href="http://nnpdf.hepforge.org">NNPDF</a> series of PDF determinations.</p>
+<h2 id="the-plugin">The plugin</h2>
+
+        
+      
+        
+        <p>This package consists of two major parts</p>
+<ul>
+<li><strong>The APFELgrid plugin</strong> itself, which performs the combination of APPLgrid tables and APFEL evolution into FK tables.</li>
+<li><strong>The FastKernel driver</strong>, which describes the FK file format and provides basic convolution routines.</li>
+</ul>
+<p>The APFELgrid code is installed directly as a plugin to APFEL. Its use is demonstrated in the example <em>example_gen.cc</em>.</p>
+<p>The FastKernel driver is supplied as a single C++ header which may be dropped into users projects where convenient. Included in 
+the driver are routines for the basic and SIMD accelerated convolution with externally provided PDFs. An example of how to use the
+included driver is given in <em>example_conv.cc</em>. The FK table format itselfis a simple plaintext format designed such that writing 
+custom interfaces to it should be simple. </p>
+<h2 id="requirements">Requirements</h2>
+
+        
+      
+        
+        <ul>
+<li><strong>APFEL</strong>         <a href="http://github.com/scarrazza/apfel">2.7.1</a></li>
+<li><strong>LHAPDF</strong>         <a href="http://lhapdf.hepforge.org">6.X.X</a></li>
+<li><strong>APPLgrid</strong>         <a href="http://applgrid.hepforge.org">1.4.70</a></li>
+</ul>
+<p>Your APPLgrid installation must be modified such that all headers are installed
+(simply copy all headers from /src/ to /appl_grid/ before installation of APPLgrid)</p>
+<h2 id="installation-and-tests">Installation and tests</h2>
+
+        
+      
+        
+        <p>A bootstrap script is provided which downloads and installs the relevant APPLgrid headers,
+detects the path of APFEL and configures and compiles the package for installation there.</p>
+<p>To use this script and install to the default directory type</p>
+<p>./setup.sh
+make install</p>
+<p>Alternatively, the APPLgrid headers may be installed manually as specified above, and the
+installation performed in the typical autotools fashion</p>
+<p>(autoreconf -i)
+./configure
+make
+make install</p>
+<p>A few tests can be performed upon the package with</p>
+<p>make check</p>
+<p>which is automatically executed by the boostrap script.</p>
+<h2 id="examples">Examples</h2>
+
+        
+      
+        
+        <p>For usage examples, see</p>
+<ul>
+<li><strong>/tests/example_gen.cc</strong> for an FK table generation example</li>
+<li><strong>/tests/example_conv.cc</strong> for an FK table convolution example</li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+
+        
+      
+        
+        <p>Documentation is generated with <a href="https://github.com/jashkenas/docco">docco</a>.
+./docco_generate.sh</p>
+<h2 id="feedback">Feedback</h2>
+
+        
+      
+        
+        <p>For comments or questions please get in contact via github.</p>
+
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

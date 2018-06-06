@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>APFELgrid</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="apfelgrid">APFELgrid</h1>
+
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="../README.html">
+                    ./README.md
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="example_conv.html">
+                    ./tests/example_conv.cc
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="example_gen.html">
+                    ./tests/example_gen.cc
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <h2 id="fastkernel-table-convolution">FastKernel table convolution</h2>
+
+        
+      
+        
+        <p>This example demonstrates how an <strong>FK</strong> table may be read from file and convoluted with a given PDF.</p>
+
+        
+      
+        
+        <p>For this demonstration, we need some standard headers</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;cstdlib&gt;</span></span></pre></div>
+        
+      
+        
+        <p>Along with <strong>LHAPDF</strong> to provide initial scale PDFs</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">"LHAPDF/LHAPDF.h"</span></span></pre></div>
+        
+      
+        
+        <p>And the required <strong>APFELgrid</strong> headers</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">"APFELgrid/fastkernel.h"</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">"APFELgrid/transform.h"</span></span></pre></div>
+        
+      
+        
+        <p>We start with some boilerplate, a typedef named <em>ctype</em> so that we may switch between
+double and single precision convolutions simply, and a handle for the <strong>LHAPDF</strong> (v5-style)
+interface for <strong>PDF</strong> evolution (as per standard <strong>APPLgrid</strong> procedure).</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">float</span> ctype;
+<span class="hljs-keyword">extern</span> <span class="hljs-string">"C"</span> <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">evolvepdf_</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">double</span>&amp; , <span class="hljs-keyword">const</span> <span class="hljs-keyword">double</span>&amp; , <span class="hljs-keyword">double</span>* )</span></span>;</pre></div>
+        
+      
+        
+        <p>Now we setup an equivalent bit of boilerplate for the <strong>FK</strong> convolution.
+Unlike <strong>APPLgrids</strong>, <strong>FK</strong> tables require PDFs in the DGLAP or Evolution (EVLN) basis
+(see the reference manual for details). <strong>APFELgrid</strong> provides a helper utility to
+perform the rotation to the EVLN basis from the <strong>LHAPDF</strong> basis. 
+No implicit rotation is performed, as this would require prior knowledge of the
+internal representation of PDFs used in the fit.</p>
+
+        
+      
+        
+        <p>The function <em>fkpdf</em> therefore interfaces the <strong>LHAPDF</strong> call <em>evolvepdf_</em> with
+the <strong>FK</strong> convolution by means of this rotation. The double <em>lha_pdf</em> holds the
+intermediate values in the <strong>LHAPDF</strong> basis. Here the member argument <em>n</em> is unused.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">static</span> <span class="hljs-keyword">double</span>* lha_pdf;
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">fkpdf</span> <span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">double</span>&amp; x, <span class="hljs-keyword">const</span> <span class="hljs-keyword">double</span>&amp; Q, <span class="hljs-keyword">const</span> <span class="hljs-keyword">size_t</span>&amp; n, ctype* pdf)</span>
+</span>{
+  evolvepdf_(x,Q,lha_pdf);
+  NNPDF::LHA2EVLN&lt;<span class="hljs-keyword">double</span>, ctype&gt;(lha_pdf, pdf);
+}</pre></div>
+        
+      
+        
+        <p>With the boilerplate completed, we start the main loop by initialising the <em>lha_pdf</em> array</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span>* argv[])</span> </span>{
+	lha_pdf = <span class="hljs-keyword">new</span> <span class="hljs-keyword">double</span>[<span class="hljs-number">13</span>];</pre></div>
+        
+      
+        
+        <p>The <strong>FK</strong> table is then read from file, and a PDF set is initialised</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-built_in">std</span>::ifstream infile; infile.open(<span class="hljs-string">"./tests/atlas-Z0-rapidity.fk"</span>);
+	NNPDF::FKTable&lt;ctype&gt; FK(infile);
+	LHAPDF::initPDFSet(<span class="hljs-string">"NNPDF30_nlo_as_0118"</span>, LHAPDF::LHGRID, <span class="hljs-number">0</span>);</pre></div>
+        
+      
+        
+        <p>We now allocate an array (of type <em>ctype</em>) for results and perform the convolution.
+The arguments to <em>FK::Convolute</em> here are</p>
+<ul>
+<li><em>fkpdf</em> - a pointer to a function providing PDFs for individual values of <em>x*, *Q</em> and member <em>n</em> as defined above</li>
+<li><em>1</em> - Here we only require one PDF member to be convoluted, but this may be increased if required.</li>
+<li><em>results</em> - The results array</li>
+</ul>
+
+        
+          <div class='highlight'><pre>	ctype* results = <span class="hljs-keyword">new</span> ctype[FK.GetNData()];
+	FK.Convolute(fkpdf, <span class="hljs-number">1</span>, results);</pre></div>
+        
+      
+        
+        <p>For a single member convolution, the results of the product can be simply displayed as so</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>; i &lt; FK.GetNData(); i++)
+		<span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; results[i] &lt;&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</pre></div>
+        
+      
+        
+        <p>Finally we clean up and end the program.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">delete</span>[] results;
+	<span class="hljs-keyword">delete</span>[] lha_pdf;
+	<span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
+}</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>
