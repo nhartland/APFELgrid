@@ -21,7 +21,7 @@ PREFIX=$(apfel-config --prefix)
 ####################### Header installation #######################
 
 echo "Detected APPLgrid version: " $APPLVER" .. supplementing with full headers ... "
-wget http://www.hepforge.org/archive/applgrid/$APPLVER.tgz
+wget http://applgrid.hepforge.org/downloads/$APPLVER.tgz
 
 if [ ! -f "./"$APPLVER".tgz" ]; then
     echo "APPLgrid tgz failed to download!"
