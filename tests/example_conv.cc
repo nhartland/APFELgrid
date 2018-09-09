@@ -24,7 +24,7 @@ extern "C" void evolvepdf_(const double& , const double& , double* );
 // Now we setup an equivalent bit of boilerplate for the **FK** convolution.
 // Unlike **APPLgrids**, **FK** tables require PDFs in the DGLAP or Evolution (EVLN) basis
 // (see the reference manual for details). **APFELgrid** provides a helper utility to
-// perform the rotation to the EVLN basis from the **LHAPDF** basis. 
+// perform the rotation to the EVLN basis from the **LHAPDF** basis.
 // No implicit rotation is performed, as this would require prior knowledge of the
 // internal representation of PDFs used in the fit.
 
@@ -35,7 +35,7 @@ static double* lha_pdf;
 void fkpdf (const double& x, const double& Q, const size_t& n, ctype* pdf)
 {
   evolvepdf_(x,Q,lha_pdf);
-  NNPDF::LHA2EVLN<double, ctype>(lha_pdf, pdf);
+  NNPDF_APFELgrid::LHA2EVLN<double, ctype>(lha_pdf, pdf);
 }
 
 
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
 	// The **FK** table is then read from file, and a PDF set is initialised
 	std::ifstream infile; infile.open("./tests/atlas-Z0-rapidity.fk");
-	NNPDF::FKTable<ctype> FK(infile);
+	NNPDF_APFELgrid::FKTable<ctype> FK(infile);
 	LHAPDF::initPDFSet("NNPDF30_nlo_as_0118", LHAPDF::LHGRID, 0);
 
 	// We now allocate an array (of type *ctype*) for results and perform the convolution.
@@ -65,6 +65,3 @@ int main(int argc, char* argv[]) {
 	delete[] lha_pdf;
 	exit(0);
 }
-
-
-

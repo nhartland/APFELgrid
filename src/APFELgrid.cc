@@ -32,7 +32,7 @@
 #include <math.h>
 #include <sys/time.h>
 
-namespace NNPDF{
+namespace NNPDF_APFELgrid{
   // FKGenerator constructor/destructor - FKGenerator is a wrapper class that needs very little handling
   FKGenerator::FKGenerator( std::istream& is ): FKTable(is) {};
   FKGenerator::~FKGenerator(){}
@@ -100,19 +100,19 @@ namespace APFELgrid{
         appl::igrid *igrid = const_cast<appl::igrid*>(g.weightgrid(i, j));
         for (int ix1=0; ix1<igrid->Ny1(); ix1++)
         for (int ix2=0; ix2<igrid->Ny2(); ix2++)
-        for (int t=0; t<igrid->Ntau(); t++) 
+        for (int t=0; t<igrid->Ntau(); t++)
         for (int ip=0; ip<g.subProcesses(i); ip++)
           {
             // Associated weight
             const double point_weight = (*(const SparseMatrix3d*) igrid->weightgrid(ip))(t,ix1,ix2);
-            if ( point_weight != 0 || !nonzero) 
+            if ( point_weight != 0 || !nonzero)
             {
               xmin = std::min(xmin, igrid->fx(igrid->gety1(ix1)));
               xmin = std::min(xmin, igrid->fx(igrid->gety2(ix2)));
             }
           }
       }
-    
+
     return xmin;
   }
 
@@ -140,7 +140,7 @@ namespace APFELgrid{
   {
     std::vector<std::string> outvec;
     std::stringstream ss(str); std::string s;
-    while (getline(ss, s, ':')) 
+    while (getline(ss, s, ':'))
       outvec.push_back(s);
     return outvec;
   }
@@ -178,7 +178,7 @@ namespace APFELgrid{
   // Fetches the flag specifying whether or not a grid is weighted from the TFile
   bool get_pdf_wgt(TFile& f, std::string const& directory,  int const& gidx, int const& d)
   {
-    char name[128];  sprintf(name, (directory+"/weight[alpha-%d][%03d]").c_str(), gidx, d); 
+    char name[128];  sprintf(name, (directory+"/weight[alpha-%d][%03d]").c_str(), gidx, d);
     std::string strname = name; return (*(TVectorT<double>*)f.Get((strname+"/Parameters").c_str()))(13);
   }
 
@@ -204,7 +204,7 @@ namespace APFELgrid{
     for (int tsp=0; tsp<nsubproc; tsp++)
       if ((*(const SparseMatrix3d*) igrid_nc->weightgrid(tsp))[tau] != NULL)
         if (( ts1 = (*(const SparseMatrix3d*) igrid_nc->weightgrid(tsp))[tau]->trimmed(alpha) ) != NULL)
-        {                
+        {
           nxlow  = std::min(ts1->lo(), nxlow);
           nxhigh = std::max(ts1->hi(), nxhigh);
         }
@@ -254,7 +254,7 @@ namespace APFELgrid{
   {
     const int nxin = APFEL::nIntervals();
     for (int i=0; i<nxin; i++)
-    {    
+    {
       for (size_t j=0; j<14; j++)
         delete[] f[i][j];
       delete[] f[i];
@@ -312,15 +312,15 @@ namespace APFELgrid{
     {
       // Elapsed time update
       timeval t2; gettimeofday(&t2, NULL);
-      double elapsedTime = (t2.tv_sec - t1.tv_sec); 
-      elapsedTime += (t2.tv_usec - t1.tv_usec) / 1E6f; 
+      double elapsedTime = (t2.tv_sec - t1.tv_sec);
+      elapsedTime += (t2.tv_usec - t1.tv_usec) / 1E6f;
 
       // Percentage complete, ETA
       const double percomp= 100.0*((double)compElements/(double)totElements);
       const double eta = ( elapsedTime / percomp ) * ( 100.0 - percomp );
 
       std::cout << "-- "<< std::setw(6) << std::setprecision(4)  << percomp << "\% complete."
-           << " T Elapsed: "  << std::setw(6)<<std::setprecision(4) << elapsedTime/60.0 
+           << " T Elapsed: "  << std::setw(6)<<std::setprecision(4) << elapsedTime/60.0
            << " min. ETA: "   << std::setw(6)<<std::setprecision(4) << eta/60.0<<" min.\r";
       std::cout.flush();
     }
@@ -331,24 +331,24 @@ namespace APFELgrid{
 
   // Generates a new FKGenerator class, given a base appl::grid, initial scale and setname.
   // Physics and interpolation parameters are obtained directly from APFEL
-  NNPDF::FKGenerator* generate_FK( appl::grid const& g, double const& Q0, std::string const& setname)
+  NNPDF_APFELgrid::FKGenerator* generate_FK( appl::grid const& g, double const& Q0, std::string const& setname)
   {
     // Generate FKTable header
-    NNPDF::FKHeader FKhead;
-    FKhead.AddTag(NNPDF::FKHeader::BLOB, "GridDesc", g.getDocumentation());
-    FKhead.AddTag(NNPDF::FKHeader::GRIDINFO, "SETNAME", setname);
-    FKhead.AddTag(NNPDF::FKHeader::GRIDINFO, "NDATA", g.Nobs());
-    FKhead.AddTag(NNPDF::FKHeader::GRIDINFO, "HADRONIC", true);
-    FKhead.AddTag(NNPDF::FKHeader::VERSIONS, "APFEL", APFEL::GetVersion());
-    FKhead.AddTag(NNPDF::FKHeader::THEORYINFO, "Q0", Q0 );
+    NNPDF_APFELgrid::FKHeader FKhead;
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::BLOB, "GridDesc", g.getDocumentation());
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::GRIDINFO, "SETNAME", setname);
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::GRIDINFO, "NDATA", g.Nobs());
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::GRIDINFO, "HADRONIC", true);
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::VERSIONS, "APFEL", APFEL::GetVersion());
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::THEORYINFO, "Q0", Q0 );
 
     // x-grid header
     const int nx = APFEL::nIntervals();
-    FKhead.AddTag(NNPDF::FKHeader::GRIDINFO, "NX", nx );
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::GRIDINFO, "NX", nx );
     std::stringstream xGheader;
     for (int i=0; i<nx; i++)
       xGheader << std::setprecision(16) << std::scientific << APFEL::xGrid(i) <<std::endl;
-    FKhead.AddTag(NNPDF::FKHeader::BLOB, "xGrid", xGheader.str());
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::BLOB, "xGrid", xGheader.str());
 
     // Full flavourmap
     std::stringstream fMapHeader;
@@ -358,17 +358,17 @@ namespace APFELgrid{
         fMapHeader << "1 ";
       fMapHeader<<std::endl;
     }
-    FKhead.AddTag(NNPDF::FKHeader::BLOB, "FlavourMap", fMapHeader.str());
+    FKhead.AddTag(NNPDF_APFELgrid::FKHeader::BLOB, "FlavourMap", fMapHeader.str());
 
     std::stringstream IO; FKhead.Print(IO);
-    return new NNPDF::FKGenerator( IO );
+    return new NNPDF_APFELgrid::FKGenerator( IO );
   }
 
   // Performs the combination of an APPLgrid g with evolution factors provided
-  // by APFEL, resulting in a new FK table. Required arguments are the initial scale Q0, name of the produced table 'name', 
+  // by APFEL, resulting in a new FK table. Required arguments are the initial scale Q0, name of the produced table 'name',
   // the appl::grid g, the path to the appl::grid file itself, and an (optional) appl::grid directory. The paths are required
-  // as we have to reconstruct the _m_reweight parameter from APPLgrid.  
-  NNPDF::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory)
+  // as we have to reconstruct the _m_reweight parameter from APPLgrid.
+  NNPDF_APFELgrid::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory)
   {
     // Read TFile for extraction of pdfwgt parameter
     TFile f(gridfile.c_str());
@@ -378,7 +378,7 @@ namespace APFELgrid{
     get_appl_Q2lims(g, Qmin, Qmax);
     Qmin = std::sqrt(Qmin); Qmax = std::sqrt(Qmax);
     APFEL::SetQLimits( std::min(Q0, Qmin), Qmax );
-    
+
     // Initialise APFEL
     APFEL::LockGrids(true);
     APFEL::SetFastEvolution(false);
@@ -387,10 +387,10 @@ namespace APFELgrid{
     APFEL::EvolveAPFEL(Q0, Q0);
 
     // Setup FK table and evolution factor arrays
-    NNPDF::FKGenerator* FK = generate_FK(g, Q0, name);
+    NNPDF_APFELgrid::FKGenerator* FK = generate_FK(g, Q0, name);
     double*** fA = alloc_evfactor();
     double*** fB = alloc_evfactor();
-  
+
     // Progress monitoring
     int completedElements = 0;
     const int totalElements = countElements(g);
@@ -407,7 +407,7 @@ namespace APFELgrid{
       const size_t nsubproc = g.subProcesses(gidx);
       double *W = new double[nsubproc];
       double *H = new double[nsubproc];
-      
+
       // Fetch grid pointer
       appl::igrid const *igrid = g.weightgrid(gidx, d);
       for (int t=0; t<igrid->Ntau(); t++) // Loop over scale bins
@@ -425,7 +425,7 @@ namespace APFELgrid{
           const double x1 = igrid->fx(igrid->gety1(a));
           if (nxlow <= nxhigh)
             compute_evfactors(Q0, Q, x1, fA);
-          
+
           for (int b=nxlow; b<=nxhigh; b++) // Loop over x2 bins
           {
             // fetch weight values
@@ -433,7 +433,7 @@ namespace APFELgrid{
             for (size_t ip=0; ip<nsubproc; ip++)
               if (( W[ip] = (*(const SparseMatrix3d*) const_cast<appl::igrid*>(igrid)->weightgrid(ip))(t,a,b) )!=0)
                 nonzero=true;
-            
+
             // If nonzero, perform combination
             if (nonzero)
             {
@@ -441,7 +441,7 @@ namespace APFELgrid{
               const double x2 = igrid->fx(igrid->gety2(b));
               const double pdfnrm =  pdfwgt ? igrid->weightfun(x1)*igrid->weightfun(x2) : 1.0;
               const double norm = pdfnrm*compute_wgt_norm(g, d, pto, as, x1, x2);
-              
+
               // Compute evolution factors for second PDF
               compute_evfactors(Q0, Q, x2, fB);
 
@@ -471,7 +471,7 @@ namespace APFELgrid{
     free_evfactor(fA);
     free_evfactor(fB);
 
-    std::cout << std::endl;  
+    std::cout << std::endl;
     return FK;
   }
 
