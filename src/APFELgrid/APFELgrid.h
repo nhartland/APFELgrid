@@ -29,7 +29,7 @@ namespace appl { class grid; }
 namespace APFELgrid
 {
   // ************************ Public utility functions **************************
-  // These functions are for use when initialising APFEL kinematics such that 
+  // These functions are for use when initialising APFEL kinematics such that
   // they are suitable for the relevant APPLgrid.
 
   // Returns the minimum value in the APPLgrid x-grid
@@ -42,13 +42,13 @@ namespace APFELgrid
 
   // ************************ FK table computation **************************
   // Performs the combination of an APPLgrid g with evolution factors provided
-  // by APFEL, resulting in a new FK table. Required arguments are the initial 
+  // by APFEL, resulting in a new FK table. Required arguments are the initial
   // scale for the FK tables (Q0), the name of the produced table (name), the appl::grid (g),
   // the path to the appl::grid (gridfile) and an optional appl::grid directory (directory).
-  NNPDF::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory = "grid" );
+  NNPDF_APFELgrid::FKTable<double>* computeFK( double const& Q0, std::string const& name, appl::grid const& g, std::string const& gridfile, std::string directory = "grid" );
 }
 
-namespace NNPDF
+namespace NNPDF_APFELgrid
 {
     /**
     * \class FKGenerator

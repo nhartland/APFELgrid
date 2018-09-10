@@ -58,24 +58,21 @@ int main(int argc, char* argv[]) {
   // + *g*            - the **APPLgrid** to be combined
   // + *gridfile*     - the path to the **APPLgrid** to be combined
 
-  // *computeFK* will then return an *NNPDF::FKTable\<double\>*. The template parameter specifies
+  // *computeFK* will then return an *NNPDF_APFELgrid::FKTable\<double\>*. The template parameter specifies
   // the precision of the internal representation of the FK table, along with the precision of its
   // output after convolution. For generation purposes this is fixed at double precision, however
   // the grid may be later read at single precision in order to enjoy the benefits of faster convolution.
-  NNPDF::FKTable<double>* FK = APFELgrid::computeFK(Q0, "ATLASZRAP", g, gridfile);
+  NNPDF_APFELgrid::FKTable<double>* FK = APFELgrid::computeFK(Q0, "ATLASZRAP", g, gridfile);
 
   // Now the user may add various tags to the FK table as they wish, to help identify e.g
   // the theory parameters used in its generation later. For example:
-  FK->AddTag(NNPDF::FKHeader::THEORYINFO, "TAG_KEY", "TAG_VALUE");
-  FK->AddTag(NNPDF::FKHeader::THEORYINFO, "PertubativeOrder_asString", "NLO");
-  FK->AddTag(NNPDF::FKHeader::THEORYINFO, "PertubativeOrder_asInt", 1);
+  FK->AddTag(NNPDF_APFELgrid::FKHeader::THEORYINFO, "TAG_KEY", "TAG_VALUE");
+  FK->AddTag(NNPDF_APFELgrid::FKHeader::THEORYINFO, "PertubativeOrder_asString", "NLO");
+  FK->AddTag(NNPDF_APFELgrid::FKHeader::THEORYINFO, "PertubativeOrder_asInt", 1);
 
   // Finally we write the new FK table to file, exit and close the main loop
   std::ofstream outfile; outfile.open("./tests/atlas-Z0-rapidity.fk");
   FK->Print(outfile); outfile.close();
-  
+
   exit(0);
 }
-
-
-
