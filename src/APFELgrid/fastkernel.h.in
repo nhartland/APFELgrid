@@ -223,6 +223,7 @@ namespace NNPDF
 
       typedef void (*extern_pdf)(const double& x, const double& Q, const size_t& n, T* pdf);
       void Convolute(extern_pdf pdf, size_t const& NPDF, T* out);
+      void Convolute(T* pdf, size_t const& NPDF, T* out);
 
       // ******************** FK Get Methods ***************************
 
@@ -296,6 +297,7 @@ namespace NNPDF
 
       void InitialiseFromStream(std::istream&, std::vector<std::string> const& cFactors); //!< Initialise the FK table from an input stream
       void CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf); // Cache PDF for convolution
+      void CachePDF(T* inpdf, size_t const& NPDF, T* pdf); // Cache PDF for convolution
 
       int parseNonZero(); // Parse flavourmap information into fNonZero
   };
@@ -953,7 +955,8 @@ namespace NNPDF
     const int Psz = sizeof(T)*fDSz*Npdf;
     int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, Psz);
     if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + ToString(err));
-    memset_s(pdf,0,Psz);
+    //memset_s(pdf,0,Psz);
+    std::memset(pdf,0,Psz);
     CachePDF(inpdf, Npdf, pdf);
 
     // Calculate observables
@@ -977,7 +980,6 @@ namespace NNPDF
   void FKTable<T>::CachePDF(extern_pdf inpdf, size_t const& NPDF, T* pdf)
   {
     // prepare PDF representation
-    int index = 0;
     const int NFL = 14;
     T* EVLN = new T[fNx*NFL]();
     
@@ -1011,6 +1013,45 @@ namespace NNPDF
     return;
   }
 
+  // Perform convolution
+  template<typename T>
+  void FKTable<T>::Convolute(T* inpdf, size_t const& Npdf, T* out)
+  {
+    // Fetch PDF array
+    T *pdf = 0;
+
+    const int Psz = sizeof(T)*fDSz*Npdf;
+    int err = posix_memalign(reinterpret_cast<void **>(&pdf), 32, Psz);
+    if (err != 0) throw std::runtime_error("FKTable::Convolute posix_memalign failure:" + ToString(err));
+    //memset_s(pdf,0,Psz);
+    std::memset(pdf,0,Psz);
+    CachePDF(inpdf, Npdf, pdf);
+
+    // Calculate observables
+#if APFELGRID_HAVE_OMP == 1
+#pragma omp parallel for
+#endif
+    for (int i = 0; i < fNData; i++)
+      for (size_t n = 0; n < Npdf; n++)
+      {
+        out[i*Npdf + n] = 0;
+        convolute(pdf+fDSz*n,fSigma+fDSz*i,out[i*Npdf + n],fDSz);
+      }
+
+    // Delete pdfs
+    free(reinterpret_cast<void *>(pdf));
+    return;
+  }
+
+  // Perform convolution
+  template<typename T>
+  void FKTable<T>::CachePDF(T* inpdf, size_t const& NPDF, T* pdf)
+  {
+    const int itot = NPDF * fNonZero * fTx;
+    for (int i = 0; i < itot; i++)
+      pdf[i] = inpdf[i];
+    return;
+  }
 
   // GetFKValue returns the appropriate point of the FK table
   template<typename T>
