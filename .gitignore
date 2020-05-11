@@ -34,3 +34,14 @@ tests/.deps/
 tests/.dirstamp
 tests/example_conv-example_conv.o
 tests/example_gen-example_gen.o
+compile
+example_conv.log
+example_conv.trs
+example_gen.log
+example_gen.trs
+test-driver
+test-suite.log
+tests/clearTestData.sh.log
+tests/clearTestData.sh.trs
+tests/fetchTestData.sh.log
+tests/fetchTestData.sh.trs
